@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>K-Win</title>
+    <title>K-Win Admin</title>
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiSy1XaW4iLCJzaG9ydF9uYW1lIjoiSy1XaW4iLCJzdGFydF91cmwiOiIuL2luZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDAwMDAwIiwidGhlbWVfY29sb3ciOiIjZmZkYTAwIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJsb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiSy1XaW4gQWRtaW4iLCJzaG9ydF9uYW1lIjoiSy1XaW4iLCJzdGFydF91cmwiOiIuL2luZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDAwMDAwIiwidGhlbWVfY29sb3ciOiIjZmZkYTAwIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vamFuaXRoZGlkdWxhMDI1LWRlc2lnbi9lY2FyZC9tYWluL2xvZ28ucG5nIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3BuZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
 
     <style>
         :root { 
@@ -16,167 +16,145 @@
             --text: #ffffff;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', Roboto, sans-serif; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
-            margin: 0; padding: 0; background-color: var(--bg); color: var(--text);
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden;
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden;
         }
 
-        /* Language Bar */
-        .lang-bar { display: flex; gap: 8px; margin-top: 20px; z-index: 10; }
-        .lang-btn {
-            background: #1a1a1a; color: #888; border: 1px solid #333; padding: 8px 16px;
-            border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: 0.3s;
-        }
-        .lang-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+        /* Mobile Status Bar Padding */
+        .safe-area { padding-top: env(safe-area-inset-top); width: 100%; }
 
-        /* Install Banner */
+        /* Install Bar - Only shows when not installed */
         #install-banner {
-            display: none; width: 90%; max-width: 400px; background: var(--accent); color: #000;
-            padding: 15px; justify-content: space-between; align-items: center;
-            border-radius: 15px; font-weight: bold; position: fixed; top: 20px; z-index: 9999;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none; width: 100%; background: var(--accent); color: #000;
+            padding: 12px 20px; justify-content: space-between; align-items: center;
+            font-weight: bold; position: fixed; top: 0; z-index: 9999;
+            box-shadow: 0 4px 15px rgba(255, 218, 0, 0.4);
         }
         #install-banner button {
-            background: #000; color: var(--accent); border: none; padding: 8px 15px; border-radius: 10px; font-weight: 900; cursor: pointer;
+            background: #000; color: var(--accent); border: none;
+            padding: 8px 15px; border-radius: 8px; font-weight: 900;
         }
 
-        .header { text-align: center; margin-top: 50px; }
+        .header {
+            text-align: center; margin-top: 40px; margin-bottom: 20px;
+        }
         .logo-circle {
-            width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--accent);
-            padding: 5px; margin: 0 auto 15px; background: #000;
+            width: 110px; height: 110px; border-radius: 50%;
+            border: 4px solid var(--accent); padding: 5px;
+            margin: 0 auto 15px; box-shadow: 0 0 25px rgba(255, 218, 0, 0.2);
         }
         .logo-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        h1 { margin: 0; font-size: 2.2rem; letter-spacing: 4px; color: var(--accent); font-weight: 900; }
 
-        .container { width: 90%; max-width: 400px; margin-top: 30px; }
-        .card { background: var(--card); border-radius: 30px; padding: 30px; border: 1px solid #222; }
+        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--accent); }
+        .subtitle { font-size: 0.7rem; letter-spacing: 4px; opacity: 0.6; text-transform: uppercase; }
 
-        label { display: block; font-size: 0.75rem; color: var(--accent); margin-bottom: 12px; font-weight: bold; text-align: center; }
-        input {
-            width: 100%; background: #000; border: 2px solid #333; border-radius: 18px;
-            color: var(--accent); padding: 18px; font-size: 1.8rem; font-weight: bold; text-align: center;
+        .container {
+            width: 90%; max-width: 400px; flex: 1; display: flex; flex-direction: column; gap: 15px;
         }
-        input:focus { border-color: var(--accent); outline: none; }
+
+        .card {
+            background: var(--card); border-radius: 30px; padding: 25px;
+            border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+        
+        input {
+            width: 100%; background: #000; border: 2px solid #333;
+            border-radius: 20px; color: var(--accent); padding: 18px;
+            font-size: 2rem; font-weight: bold; text-align: center;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(255, 218, 0, 0.2); }
 
         .btn {
-            width: 100%; padding: 18px; border-radius: 18px; border: none; font-size: 1rem;
-            font-weight: bold; display: flex; align-items: center; justify-content: center;
-            gap: 12px; margin-top: 15px; transition: 0.2s; cursor: pointer;
+            width: 100%; padding: 18px; border-radius: 20px; border: none;
+            font-size: 1rem; font-weight: bold; display: flex; align-items: center;
+            justify-content: center; gap: 10px; margin-bottom: 12px;
+            transition: 0.2s; cursor: pointer;
         }
+        .btn:active { transform: scale(0.96); }
+
         .btn-save { background: var(--accent); color: #000; }
         .btn-wa { background: #25D366; color: #fff; }
         .btn-sms { background: #1d9bf0; color: #fff; }
-        .btn:active { transform: scale(0.96); }
 
-        .footer { margin-top: auto; padding: 30px 10px; font-size: 0.75rem; opacity: 0.6; text-align: center; line-height: 1.6; }
+        .footer { margin-bottom: 30px; font-size: 0.75rem; opacity: 0.4; text-align: center; }
+
+        /* Animation for Banner */
+        @keyframes slideIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.5s ease forwards; }
+
     </style>
 </head>
 <body>
 
     <div id="install-banner">
-        <span id="txt-install-msg">📲 Install K-Win App</span>
+        <span>📲 K-Win App එක දාගන්න</span>
         <button id="btn-install">INSTALL</button>
     </div>
 
-    <div class="lang-bar">
-        <div id="btn-en" class="lang-btn active" onclick="setLang('en')">English</div>
-        <div id="btn-si" class="lang-btn" onclick="setLang('si')">සිංහල</div>
-        <div id="btn-ta" class="lang-btn" onclick="setLang('ta')">தமிழ்</div>
-    </div>
+    <div class="safe-area"></div>
 
     <div class="header">
         <div class="logo-circle">
-            <img src="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg" alt="Logo">
+            <img src="https://raw.githubusercontent.com/janithdidula025-design/ecard/main/logo.png" alt="Logo">
         </div>
         <h1>K-WIN</h1>
+        <div class="subtitle">Management System</div>
     </div>
 
     <div class="container">
         <div class="card">
-            <label id="lbl-phone">ENTER MOBILE NUMBER</label>
-            <input type="tel" id="phone" placeholder="07XXXXXXXX" maxlength="10">
+            <div class="input-group">
+                <label>Enter Mobile Number</label>
+                <input type="tel" id="phone" placeholder="07XXXXXXXX" maxlength="10">
+            </div>
 
             <button class="btn btn-save" onclick="saveContact()">
-                <span id="btn-save-txt">👤 Save to Contacts</span>
+                <span>👤</span> Save to Contacts
             </button>
             <button class="btn btn-wa" onclick="sendAction('wa')">
-                <span id="btn-wa-txt">💬 WhatsApp Link</span>
+                <span>💬</span> WhatsApp Link
             </button>
             <button class="btn btn-sms" onclick="sendAction('sms')">
-                <span id="btn-sms-txt">✉️ Direct SMS</span>
+                <span>✉️</span> Direct SMS
             </button>
         </div>
     </div>
 
-    <div class="footer" id="txt-footer">
-        Powered by K-Win | Design by Janith Didula
+    <div class="footer">
+        Created by <b>Janith Didula</b>
     </div>
 
     <script>
-        const langData = {
-            en: {
-                install: "📲 Install K-Win App",
-                label: "ENTER MOBILE NUMBER",
-                save: "👤 Save to Contacts",
-                wa: "💬 WhatsApp Link",
-                sms: "✉️ Direct SMS",
-                footer: "Powered by K-Win | Design by Janith Didula",
-                alert: "Please enter a valid number"
-            },
-            si: {
-                install: "📲 K-Win ඇප් එක ලබාගන්න",
-                label: "දුරකථන අංකය ඇතුළත් කරන්න",
-                save: "👤 සම්බන්ධතාවලට එක් කරන්න",
-                wa: "💬 WhatsApp පණිවිඩයක්",
-                sms: "✉️ කෙටි පණිවිඩයක් (SMS)",
-                footer: "බලය ගැන්වීම K-Win | නිර්මාණය ජනිත් දිදුල",
-                alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න"
-            },
-            ta: {
-                install: "📲 K-Win செயலியை நிறுவவும்",
-                label: "கைபேசி எண்ணை உள்ளிடவும்",
-                save: "👤 தொடர்புகளில் சேமிக்கவும்",
-                wa: "💬 WhatsApp இணைப்பு",
-                sms: "✉️ நேரடி SMS",
-                footer: "K-Win மூலம் இயக்கப்படுகிறது | ஜනිத் வடிவமைக்கப்பட்டது",
-                alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்"
-            }
-        };
-
-        let currentLang = 'en';
-
-        function setLang(lang) {
-            currentLang = lang;
-            // භාෂා බොත්තම් වල වර්ණය වෙනස් කිරීම
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + lang).classList.add('active');
-
-            // පෙළ වෙනස් කිරීම
-            document.getElementById('txt-install-msg').innerText = langData[lang].install;
-            document.getElementById('lbl-phone').innerText = langData[lang].label;
-            document.getElementById('btn-save-txt').innerText = langData[lang].save;
-            document.getElementById('btn-wa-txt').innerText = langData[lang].wa;
-            document.getElementById('btn-sms-txt').innerText = langData[lang].sms;
-            document.getElementById('txt-footer').innerText = langData[lang].footer;
-        }
-
-        // --- PWA Logic ---
+        // 1. Service Worker Register කිරීම (PWA සඳහා අනිවාර්යයි)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(() => {
-                console.log("Service Worker Registered");
-            });
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log("Service Worker Registered"));
         }
 
+        // 2. දැනටමත් Install කරලා නම් බැනර් එක පෙන්නන්න එපා
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            document.getElementById('install-banner').style.display = 'none';
+        }
+
+        // 3. PWA Install Logic
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // ඇප් එක දැනටමත් ඉන්ස්ටෝල් කර නැත්නම් බැනරය පෙන්වන්න
-            if (!window.matchMedia('(display-mode: standalone)').matches) {
-                document.getElementById('install-banner').style.display = 'flex';
-            }
+            const banner = document.getElementById('install-banner');
+            banner.style.display = 'flex';
+            banner.classList.add('slide-in');
         });
 
         document.getElementById('btn-install').addEventListener('click', async () => {
@@ -190,28 +168,35 @@
             }
         });
 
-        // --- Actions ---
+        // 4. Contact Save කිරීම (Auto-save/VCF)
         function saveContact() {
             const num = document.getElementById('phone').value.trim();
-            if (num.length < 10) return alert(langData[currentLang].alert);
+            if (num.length < 10) return alert("අංකය නිවැරදිව ඇතුළත් කරන්න");
+
             const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:K-Win Client ${num}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
             const blob = new Blob([vcard], { type: "text/vcard" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = `KWin_${num}.vcf`; a.click();
+            a.href = url;
+            a.download = `KWin_${num}.vcf`;
+            a.click();
         }
+
+        // 5. WhatsApp & SMS Logic
+        const link = "https://janithdidula025-design.github.io/ecard/index.html";
+        const msg = `ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න: ${link}`;
 
         function sendAction(type) {
             let num = document.getElementById('phone').value.trim();
-            if (num.length < 10) return alert(langData[currentLang].alert);
+            if (num.length < 10) return alert("අංකය නිවැරදිව ඇතුළත් කරන්න");
+
+            // Convert to 94 format
             if (num.startsWith('0')) num = '94' + num.substring(1);
-            
-            const msg = `Your K-Win Digital Card is ready: https://janithdidula025-design.github.io/ecard/index.html`;
 
             if (type === 'wa') {
                 window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
             } else {
-                const sep = (navigator.userAgent.match(/iPhone/i)) ? '&' : '?';
+                const sep = (navigator.userAgent.match(/iPhone|iPad|iPod/i)) ? '&' : '?';
                 window.location.href = `sms:+${num}${sep}body=${encodeURIComponent(msg)}`;
             }
         }
