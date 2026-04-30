@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>K-Win</title>
     
-    <!-- Fixed K-Win PWA Manifest -->
-    <link rel="manifest" href="data:application/json;base64,ewogICAgIm5hbWUiOiAiSy1XaW4iLAogICAgInNob3J0X25hbWUiOiAiSy1XaW4iLAogICAgInN0YXJ0X3VybCI6ICJpbmRleC5odG1sIiwKICAgICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgICAidGhlbWVfY29sb3IiOiAiI2ZmZGEwMCIsCiAgICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICAgImljb25zIjpbCiAgICAgICAgewogICAgICAgICAgICAic3JjIjogImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9rd2lucHJvZHVjdGlvbi9LLVdpbi1FY2FyZC9tYWluL2xvZ28uanBlZyIsCiAgICAgICAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgICAgICAgInR5cGUiOiAiaW1hZ2UvanBlZyIsCiAgICAgICAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgICAgICB9CiAgICBdCn0=">
-
+    <!-- මම මෙහි 192x192 සහ 512x512 icons දෙකම ඇතුළත් කළා -->
+<link rel="manifest" href='data:application/json,{"name":"K-Win","short_name":"K-Win","start_url":"./index.html","display":"standalone","background_color":"#000000","theme_color":"#ffda00","icons":[{"src":"https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg","sizes":"192x192","type":"image/jpeg"},{"src":"https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg","sizes":"512x512","type":"image/jpeg"}]}'>
     <style>
         :root { 
             --accent: #ffda00;
@@ -236,7 +235,42 @@
                 window.location.href = `sms:+${num}${sep}body=${encodeURIComponent(msg)}`;
             }
         }
+let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
 
+// 1. Service Worker Register කිරීම
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('SW Registered'))
+            .catch(err => console.log('SW Registration Failed', err));
+    });
+}
+
+// 2. Install කරන්න පුළුවන් අවස්ථාව ආ විට බැනරය පෙන්වීම
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBanner.style.display = 'flex'; // මෙතනදී තමයි button එක පෙන්වන්නේ
+});
+
+// 3. Button එක click කළ විට ක්‍රියාත්මක වන ආකාරය
+document.getElementById('btn-install').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            installBanner.style.display = 'none';
+        }
+        deferredPrompt = null;
+    } else {
+        // තවමත් browser එක ready නැත්නම් පමණක් මෙය පෙන්වයි
+        const msg = currentLang === 'si' ? 
+            "කරුණාකර මොහොතක් රැඳී සිටින්න හෝ Browser Menu (තිත් 3) හරහා Install කරන්න." : 
+            "Please wait a moment or use Browser Menu (3 dots) to Install.";
+        alert(msg);
+    }
+});
         window.onload = () => setLang('en');
     </script>
 </body>
