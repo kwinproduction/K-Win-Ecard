@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>K-Win</title>
     
-    <!-- PWA Manifest (Name: K-Win) -->
+    <!-- PWA Manifest -->
     <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiSy1XaW4iLCJzaG9ydF9uYW1lIjoiSy1XaW4iLCJzdGFydF91cmwiOiIuL2luZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDAwMDAwIiwidGhlbWVfY29sb3ciOiIjZmZkYTAwIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJsb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
+
     <style>
         :root { 
             --accent: #ffda00;
@@ -19,56 +20,57 @@
         
         body {
             margin: 0; padding: 0; background-color: var(--bg); color: var(--text);
-            display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden;
         }
 
-        /* Language Switcher */
-        .lang-bar {
-            display: flex; gap: 10px; margin-top: 15px; z-index: 10;
-        }
+        /* Language Bar */
+        .lang-bar { display: flex; gap: 8px; margin-top: 20px; z-index: 10; }
         .lang-btn {
-            background: #222; color: #fff; border: 1px solid #444; padding: 5px 12px;
-            border-radius: 15px; font-size: 0.75rem; cursor: pointer;
+            background: #1a1a1a; color: #888; border: 1px solid #333; padding: 8px 16px;
+            border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: 0.3s;
         }
-        .lang-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+        .lang-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
 
         /* Install Banner */
         #install-banner {
-            display: none; width: 100%; background: var(--accent); color: #000;
-            padding: 12px 20px; justify-content: space-between; align-items: center;
-            font-weight: bold; position: fixed; top: 0; z-index: 9999;
+            display: none; width: 90%; max-width: 400px; background: var(--accent); color: #000;
+            padding: 15px; justify-content: space-between; align-items: center;
+            border-radius: 15px; font-weight: bold; position: fixed; top: 20px; z-index: 9999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         #install-banner button {
-            background: #000; color: var(--accent); border: none; padding: 8px 15px; border-radius: 8px; font-weight: 900;
+            background: #000; color: var(--accent); border: none; padding: 8px 15px; border-radius: 10px; font-weight: 900; cursor: pointer;
         }
 
-        .header { text-align: center; margin-top: 30px; }
+        .header { text-align: center; margin-top: 50px; }
         .logo-circle {
-            width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent);
-            padding: 5px; margin: 0 auto 10px;
+            width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--accent);
+            padding: 5px; margin: 0 auto 15px; background: #000;
         }
         .logo-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--accent); }
+        h1 { margin: 0; font-size: 2.2rem; letter-spacing: 4px; color: var(--accent); font-weight: 900; }
 
-        .container { width: 90%; max-width: 400px; margin-top: 20px; }
-        .card { background: var(--card); border-radius: 25px; padding: 25px; border: 1px solid #222; }
+        .container { width: 90%; max-width: 400px; margin-top: 30px; }
+        .card { background: var(--card); border-radius: 30px; padding: 30px; border: 1px solid #222; }
 
-        label { display: block; font-size: 0.7rem; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
+        label { display: block; font-size: 0.75rem; color: var(--accent); margin-bottom: 12px; font-weight: bold; text-align: center; }
         input {
-            width: 100%; background: #000; border: 2px solid #333; border-radius: 15px;
-            color: var(--accent); padding: 15px; font-size: 1.8rem; font-weight: bold; text-align: center;
+            width: 100%; background: #000; border: 2px solid #333; border-radius: 18px;
+            color: var(--accent); padding: 18px; font-size: 1.8rem; font-weight: bold; text-align: center;
         }
+        input:focus { border-color: var(--accent); outline: none; }
 
         .btn {
-            width: 100%; padding: 16px; border-radius: 15px; border: none; font-size: 0.95rem;
+            width: 100%; padding: 18px; border-radius: 18px; border: none; font-size: 1rem;
             font-weight: bold; display: flex; align-items: center; justify-content: center;
-            gap: 10px; margin-top: 15px; transition: 0.2s;
+            gap: 12px; margin-top: 15px; transition: 0.2s; cursor: pointer;
         }
         .btn-save { background: var(--accent); color: #000; }
         .btn-wa { background: #25D366; color: #fff; }
         .btn-sms { background: #1d9bf0; color: #fff; }
+        .btn:active { transform: scale(0.96); }
 
-        .footer { margin-top: auto; padding-bottom: 25px; font-size: 0.7rem; opacity: 0.5; text-align: center; }
+        .footer { margin-top: auto; padding: 30px 10px; font-size: 0.75rem; opacity: 0.6; text-align: center; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -79,9 +81,9 @@
     </div>
 
     <div class="lang-bar">
-        <div class="lang-btn active" onclick="setLang('en')">English</div>
-        <div class="lang-btn" onclick="setLang('si')">සිංහල</div>
-        <div class="lang-btn" onclick="setLang('ta')">தமிழ்</div>
+        <div id="btn-en" class="lang-btn active" onclick="setLang('en')">English</div>
+        <div id="btn-si" class="lang-btn" onclick="setLang('si')">සිංහල</div>
+        <div id="btn-ta" class="lang-btn" onclick="setLang('ta')">தமிழ்</div>
     </div>
 
     <div class="header">
@@ -113,7 +115,6 @@
     </div>
 
     <script>
-        // --- 1. පද්ධති දත්ත (Translations) ---
         const langData = {
             en: {
                 install: "📲 Install K-Win App",
@@ -140,7 +141,7 @@
                 wa: "💬 WhatsApp இணைப்பு",
                 sms: "✉️ நேரடி SMS",
                 footer: "K-Win மூலம் இயக்கப்படுகிறது | ஜනිத் வடிவமைக்கப்பட்டது",
-                alert: "செல்லுපடியாகும் எண்ணை உள்ளிடவும்"
+                alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்"
             }
         };
 
@@ -148,13 +149,11 @@
 
         function setLang(lang) {
             currentLang = lang;
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if(btn.innerText.toLowerCase().includes(lang === 'si' ? 'සිංහල' : lang === 'ta' ? 'தமிழ்' : 'english')) {
-                    btn.classList.add('active');
-                }
-            });
+            // භාෂා බොත්තම් වල වර්ණය වෙනස් කිරීම
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + lang).classList.add('active');
 
+            // පෙළ වෙනස් කිරීම
             document.getElementById('txt-install-msg').innerText = langData[lang].install;
             document.getElementById('lbl-phone').innerText = langData[lang].label;
             document.getElementById('btn-save-txt').innerText = langData[lang].save;
@@ -163,15 +162,18 @@
             document.getElementById('txt-footer').innerText = langData[lang].footer;
         }
 
-        // --- 2. PWA & Install Logic ---
+        // --- PWA Logic ---
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
+            navigator.serviceWorker.register('./sw.js').then(() => {
+                console.log("Service Worker Registered");
+            });
         }
 
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+            // ඇප් එක දැනටමත් ඉන්ස්ටෝල් කර නැත්නම් බැනරය පෙන්වන්න
             if (!window.matchMedia('(display-mode: standalone)').matches) {
                 document.getElementById('install-banner').style.display = 'flex';
             }
@@ -181,12 +183,14 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') document.getElementById('install-banner').style.display = 'none';
+                if (outcome === 'accepted') {
+                    document.getElementById('install-banner').style.display = 'none';
+                }
                 deferredPrompt = null;
             }
         });
 
-        // --- 3. Actions (WhatsApp, SMS, Contact) ---
+        // --- Actions ---
         function saveContact() {
             const num = document.getElementById('phone').value.trim();
             if (num.length < 10) return alert(langData[currentLang].alert);
