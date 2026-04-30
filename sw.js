@@ -1,17 +1,16 @@
 const CACHE_NAME = 'K-Win';
-const ASSETS_TO_CACHE = [
+const assets = [
   './',
-  './index.html', // ඔබේ ප්‍රධාන HTML ගොනුවේ නම index.html නොවේ නම් එය මෙතනට යොදන්න
+  './index.html',
   'https://raw.githubusercontent.com/janithdidula025-design/ecard/main/logo.png'
 ];
 
-// Install Service Worker and Cache Assets
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(assets)));
+});
+
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
 });
 
 // Activate and Clean Old Caches
