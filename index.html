@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>K-Win</title>
     
-   <link rel="manifest" href="manifest.json">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
     <style>
         :root { 
             --accent: #ffda00;
@@ -27,9 +29,9 @@
 
         .safe-area { padding-top: env(safe-area-inset-top); width: 100%; }
 
-        /* Install Bar - ආරම්භයේදී සඟවා තබයි */
+        /* Install Bar */
         #install-banner {
-            display: none;
+            display: none; /* Initially hidden */
             width: 100%; background: var(--accent); color: #000;
             padding: 12px 20px; justify-content: space-between; align-items: center;
             font-weight: bold; position: fixed; top: 0; z-index: 9999;
@@ -93,7 +95,6 @@
 </head>
 <body>
 
-    <!-- Install Banner -->
     <div id="install-banner">
         <span id="txt-install-msg">📲 Install K-Win App</span>
         <button id="btn-install">INSTALL</button>
@@ -101,7 +102,6 @@
 
     <div class="safe-area"></div>
 
-    <!-- Language Selector -->
     <div class="lang-bar">
         <button id="btn-en" class="lang-btn active" onclick="setLang('en')">English</button>
         <button id="btn-si" class="lang-btn" onclick="setLang('si')">සිංහල</button>
@@ -135,7 +135,7 @@
         </div>
     </div>
 
-    <div >
+    <div class="footer" id="txt-footer">
         Powered by K-Win | Design by Janith Didula
     </div>
 
@@ -199,14 +199,25 @@
             document.getElementById('txt-footer').innerText = langData[lang].footer;
         }
 
-        // --- PWA Logic ---
+        // --- consolidated PWA & Service Worker Logic ---
         let deferredPrompt;
         const installBanner = document.getElementById('install-banner');
 
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker Registered!'))
+                .catch(err => console.error('Registration Failed:', err));
+            });
+        }
+
+        // Handle Install Prompt
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt event fired');
             e.preventDefault();
             deferredPrompt = e;
-            installBanner.style.display = 'flex'; // Chrome වල Install කළ හැකි නම් පමණක් පෙන්වයි
+            installBanner.style.display = 'flex'; 
         });
 
         document.getElementById('btn-install').addEventListener('click', async () => {
@@ -222,16 +233,7 @@
             }
         });
 
-        // --- Service Worker Registration ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swCode = `self.addEventListener('fetch', function(event) {});`;
-                const blob = new Blob([swCode], {type: 'text/javascript'});
-                const url = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(url);
-            });
-        }
-
+        // --- Functions ---
         function saveContact() {
             const num = document.getElementById('phone').value.trim();
             if (num.length < 10) return alert(langData[currentLang].alert);
@@ -250,7 +252,7 @@
             if (num.length < 10) return alert(langData[currentLang].alert);
             if (num.startsWith('0')) num = '94' + num.substring(1);
             
-            const link = "https://janithdidula025-design.github.io/ecard/index.html";
+            const link = "https://kwinproduction.github.io/K-Win-Ecard/";
             const msg = `${langData[currentLang].smsMsg} ${link}`;
             
             if (type === 'wa') {
@@ -262,44 +264,6 @@
         }
 
         window.onload = () => setLang('en');
-        if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker Registered!'))
-        .catch(err => console.log('Registration Failed:', err));
-    });
-}
-        // Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js') // 'sw.js' ගොනුව Register කිරීම
-        .then(() => console.log("Service Worker Registered"))
-        .catch(err => console.log("Service Worker Failed", err));
-    });
-}
-
-let deferredPrompt;
-const installBanner = document.getElementById('install-banner');
-
-// Browser එක විසින් Install කිරීමට සුදානම් දැයි බලන Event එක
-window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('PWA is ready to install');
-    e.preventDefault();
-    deferredPrompt = e;
-    // Install කළ හැකි බව හඳුනාගත් විට පමණක් Button එක පෙන්වයි
-    installBanner.style.display = 'flex'; 
-});
-
-document.getElementById('btn-install').addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            installBanner.style.display = 'none';
-        }
-        deferredPrompt = null;
-    }
-});
     </script>
 </body>
 </html>
