@@ -1,0 +1,29 @@
+{
+  "name": "K-Win ",
+  "short_name": "K-Win",
+  "description": "K-Win Digital Business Card ",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#ffda00",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
