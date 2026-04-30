@@ -225,7 +225,7 @@
             let num = document.getElementById('phone').value.trim();
             if (num.length < 10) return alert(langData[currentLang].alert);
             if (num.startsWith('0')) num = '94' + num.substring(1);
-            const link = "https://kwinproduction.github.io/K-Win-Ecard/";
+            const link = "https://kwinproduction.github.io/K-Win-Card/";
             const msg = `${langData[currentLang].smsMsg} ${link}`;
             if (type === 'wa') {
                 window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
