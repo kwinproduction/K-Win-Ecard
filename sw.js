@@ -47,3 +47,10 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+self.addEventListener('install', (e) => {
+  console.log('Service Worker: Installed');
+});
+
+self.addEventListener('fetch', (e) => {
+  // මෙය හිස්ව තිබුණත් කමක් නැත, නමුත් fetch event එක තිබිය යුතුමයි
+});
