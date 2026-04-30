@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>K-Win Admin</title>
+    <title>K-Win</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiSy1XaW4gQWRtaW4iLCJzaG9ydF9uYW1lIjoiSy1XaW4iLCJzdGFydF91cmwiOiIuL2luZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDAwMDAwIiwidGhlbWVfY29sb3ciOiIjZmZkYTAwIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vamFuaXRoZGlkdWxhMDI1LWRlc2lnbi9lY2FyZC9tYWluL2xvZ28ucG5nIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3BuZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
@@ -106,7 +106,7 @@
 
     <div class="header">
         <div class="logo-circle">
-            <img src="https://raw.githubusercontent.com/janithdidula025-design/ecard/main/logo.png" alt="Logo">
+            <img src="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg" alt="Logo">
         </div>
         <h1>K-WIN</h1>
         <div class="subtitle">Management System</div>
@@ -131,9 +131,60 @@
         </div>
     </div>
 
-    <div class="footer">
-        Created by <b>Janith Didula</b>
+   <div class="footer" id="txt-footer">
+        Powered by K-Win | Design by Janith Didula
     </div>
+
+    <script>
+        // --- 1. පද්ධති දත්ත (Translations) ---
+        const langData = {
+            en: {
+                install: "📲 Install K-Win App",
+                label: "ENTER MOBILE NUMBER",
+                save: "👤 Save to Contacts",
+                wa: "💬 WhatsApp Link",
+                sms: "✉️ Direct SMS",
+                footer: "Powered by K-Win | Design by Janith Didula",
+                alert: "Please enter a valid number"
+            },
+            si: {
+                install: "📲 K-Win ඇප් එක ලබාගන්න",
+                label: "දුරකථන අංකය ඇතුළත් කරන්න",
+                save: "👤 සම්බන්ධතාවලට එක් කරන්න",
+                wa: "💬 WhatsApp පණිවිඩයක්",
+                sms: "✉️ කෙටි පණිවිඩයක් (SMS)",
+                footer: "බලය ගැන්වීම K-Win | නිර්මාණය ජනිත් දිදුල",
+                alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න"
+            },
+            ta: {
+                install: "📲 K-Win செயலியை நிறுவவும்",
+                label: "கைபேசி எண்ணை உள்ளிடவும்",
+                save: "👤 தொடர்புகளில் சேமிக்கவும்",
+                wa: "💬 WhatsApp இணைப்பு",
+                sms: "✉️ நேரடி SMS",
+                footer: "K-Win மூலம் இயக்கப்படுகிறது | ஜනිத் දිදුல විසින් வடிவமைக்கப்பட்டது",
+                alert: "செல்லுපடியாகும் எண்ணை உள்ளிடவும்"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText.toLowerCase().includes(lang === 'si' ? 'සිංහල' : lang === 'ta' ? 'தமிழ்' : 'english')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            document.getElementById('txt-install-msg').innerText = langData[lang].install;
+            document.getElementById('lbl-phone').innerText = langData[lang].label;
+            document.getElementById('btn-save-txt').innerText = langData[lang].save;
+            document.getElementById('btn-wa-txt').innerText = langData[lang].wa;
+            document.getElementById('btn-sms-txt').innerText = langData[lang].sms;
+            document.getElementById('txt-footer').innerText = langData[lang].footer;
+        }
 
     <script>
         // 1. Service Worker Register කිරීම (PWA සඳහා අනිවාර්යයි)
