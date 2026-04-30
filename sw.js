@@ -52,3 +52,12 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+// sw.js
+self.addEventListener('install', (e) => {
+  console.log('K-Win Service Worker Installed');
+});
+
+self.addEventListener('fetch', (e) => {
+  // App එක offline වැඩ කිරීමට අවශ්‍ය මූලික සැකසුම
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+});
