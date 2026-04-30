@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>K-Win</title>
     
-   <!-- Updated K-Win PWA Manifest (Fixed) -->
-<link rel="manifest" href="data:application/json;base64,ewogICAgIm5hbWUiOiAiSy1XaW4iLAogICAgInNob3J0X25hbWUiOiAiSy1XaW4iLAogICAgInN0YXJ0X3VybCI6ICJpbmRleC5odG1sIiwKICAgICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICAgImJhY2tncm91bmRfY29sb3ciOiAiIzAwMDAwMCIsCiAgICAidGhlbWVfY29sb3ciOiAiI2ZmZGEwMCIsCiAgICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICAgImljb25zIjpbCiAgICAgICAgewogICAgICAgICAgICAic3JjIjogImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9rd2lucHJvZHVjdGlvbi9LLVdpbi1FY2FyZC9tYWluL2xvZ28uanBlZyIsCiAgICAgICAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgICAgICAgInR5cGUiOiAiaW1hZ2UvanBlZyIsCiAgICAgICAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgICAgICB9CiAgICBdCn0=">
+    <!-- Fixed K-Win PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICAgIm5hbWUiOiAiSy1XaW4iLAogICAgInNob3J0X25hbWUiOiAiSy1XaW4iLAogICAgInN0YXJ0X3VybCI6ICJpbmRleC5odG1sIiwKICAgICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgICAidGhlbWVfY29sb3IiOiAiI2ZmZGEwMCIsCiAgICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICAgImljb25zIjpbCiAgICAgICAgewogICAgICAgICAgICAic3JjIjogImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9rd2lucHJvZHVjdGlvbi9LLVdpbi1FY2FyZC9tYWluL2xvZ28uanBlZyIsCiAgICAgICAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgICAgICAgInR5cGUiOiAiaW1hZ2UvanBlZyIsCiAgICAgICAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgICAgICB9CiAgICBdCn0=">
+
     <style>
         :root { 
             --accent: #ffda00;
@@ -26,11 +27,9 @@
             min-height: 100vh; overflow-x: hidden;
         }
 
-        .safe-area { padding-top: env(safe-area-inset-top); width: 100%; }
-
-        /* Install Bar */
+        /* Install Bar - Always on top for visibility */
         #install-banner {
-            display: none; /* Initially hidden */
+            display: none; 
             width: 100%; background: var(--accent); color: #000;
             padding: 12px 20px; justify-content: space-between; align-items: center;
             font-weight: bold; position: fixed; top: 0; z-index: 9999;
@@ -42,7 +41,7 @@
         }
 
         .lang-bar { 
-            display: flex; gap: 8px; margin-top: 30px; z-index: 10; 
+            display: flex; gap: 8px; margin-top: 70px; z-index: 10; 
             background: #111; padding: 5px; border-radius: 25px; border: 1px solid #222;
         }
         .lang-btn {
@@ -60,7 +59,7 @@
         }
         .logo-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--accent); }
+        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--accent); font-weight: 900; }
         .subtitle { font-size: 0.7rem; letter-spacing: 4px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; }
 
         .container { width: 90%; max-width: 400px; margin-top: 10px; }
@@ -98,8 +97,6 @@
         <span id="txt-install-msg">📲 Install K-Win App</span>
         <button id="btn-install">INSTALL</button>
     </div>
-
-    <div class="safe-area"></div>
 
     <div class="lang-bar">
         <button id="btn-en" class="lang-btn active" onclick="setLang('en')">English</button>
@@ -141,53 +138,36 @@
     <script>
         const langData = {
             en: {
-                install: "📲 Install K-Win App",
-                installBtn: "INSTALL",
-                subtitle: "Management System",
-                label: "ENTER MOBILE NUMBER",
-                save: "👤 Save to Contacts",
-                wa: "💬 WhatsApp",
-                sms: "✉️ SMS",
-                footer: "Powered by K-Win | Design by Janith Didula",
-                alert: "Please enter a valid number",
-                vcardName: "K-Win Client",
+                install: "📲 Install K-Win App", installBtn: "INSTALL", subtitle: "Management System",
+                label: "ENTER MOBILE NUMBER", save: "👤 Save to Contacts", wa: "💬 WhatsApp",
+                sms: "✉️ SMS", footer: "Powered by K-Win | Design by Janith Didula",
+                alert: "Please enter a valid number", vcardName: "K-Win Client",
                 smsMsg: "Get your K-Win Digital Card here:"
             },
             si: {
-                install: "📲 K-Win ඇප් එක ලබාගන්න",
-                installBtn: "පිහිටුවන්න",
-                subtitle: "කළමනාකරණ පද්ධතිය",
-                label: "දුරකථන අංකය ඇතුළත් කරන්න",
-                save: "👤 සම්බන්ධතාවලට එක් කරන්න",
-                wa: "💬 WhatsApp",
-                sms: "✉️ SMS",
-                footer: "බලය ගැන්වීම K-Win | නිර්මාණය ජනිත් දිදුල",
-                alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න",
-                vcardName: "K-Win සේවාලාභියා",
+                install: "📲 K-Win ඇප් එක ලබාගන්න", installBtn: "පිහිටුවන්න", subtitle: "කළමනාකරණ පද්ධතිය",
+                label: "දුරකථන අංකය ඇතුළත් කරන්න", save: "👤 සම්බන්ධතාවලට එක් කරන්න", wa: "💬 WhatsApp",
+                sms: "✉️ SMS", footer: "බලය ගැන්වීම K-Win | නිර්මාණය ජනිත් දිදුල",
+                alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න", vcardName: "K-Win සේවාලාභියා",
                 smsMsg: "ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න:"
             },
             ta: {
-                install: "📲 K-Win செயலியை நிறுவவும்",
-                installBtn: "நிறுவவும்",
-                subtitle: "மேலாண்மை அமைப்பு",
-                label: "கைபேசி எண்ணை உள்ளிடவும்",
-                save: "👤 தொடர்புகளில் சேமிக்கவும்",
-                wa: "💬 WhatsApp",
-                sms: "✉️ SMS",
-                footer: "K-Win மூலம் இயக்கப்படுகிறது | නිර්මාණය ජනිත් දිදුල",
-                alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்",
-                vcardName: "K-Win கிளையண்ட்",
+                install: "📲 K-Win செயலியை நிறுவவும்", installBtn: "நிறுவவும்", subtitle: "மேலாண்மை அமைப்பு",
+                label: "கைபேசி எண்ணை உள்ளிடவும்", save: "👤 தொடர்புகளில் சேமிக்கவும்", wa: "💬 WhatsApp",
+                sms: "✉️ SMS", footer: "K-Win மூலம் இயக்கப்படுகிறது | නිර්මාණය ජනිත් දිදුල",
+                alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்", vcardName: "K-Win கிளையண்ட்",
                 smsMsg: "உங்கள் K-Win டிஜிட்டல் கார்டை இங்கே பெறுங்கள்:"
             }
         };
 
         let currentLang = 'en';
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
 
         function setLang(lang) {
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btn-' + lang).classList.add('active');
-
             document.getElementById('txt-install-msg').innerText = langData[lang].install;
             document.getElementById('btn-install').innerText = langData[lang].installBtn;
             document.getElementById('txt-subtitle').innerText = langData[lang].subtitle;
@@ -198,22 +178,12 @@
             document.getElementById('txt-footer').innerText = langData[lang].footer;
         }
 
-        // --- consolidated PWA & Service Worker Logic ---
-        let deferredPrompt;
-        const installBanner = document.getElementById('install-banner');
-
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker Registered!'))
-                .catch(err => console.error('Registration Failed:', err));
-            });
+        // --- Integrated PWA Logic ---
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+            installBanner.style.display = 'flex';
         }
 
-        // Handle Install Prompt
         window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('beforeinstallprompt event fired');
             e.preventDefault();
             deferredPrompt = e;
             installBanner.style.display = 'flex'; 
@@ -223,14 +193,21 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installBanner.style.display = 'none';
-                }
+                if (outcome === 'accepted') installBanner.style.display = 'none';
                 deferredPrompt = null;
             } else {
-                alert("To install: Click Browser Menu (3 dots) -> Add to Home Screen");
+                const msg = currentLang === 'si' ? 
+                    "Browser එකේ Menu එකට (තිත් 3) ගොස් 'Install App' හෝ 'Add to Home Screen' තෝරන්න." : 
+                    "Go to Browser Menu (3 dots) and select 'Install App' or 'Add to Home Screen'.";
+                alert(msg);
             }
         });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+            });
+        }
 
         // --- Functions ---
         function saveContact() {
@@ -250,10 +227,8 @@
             let num = document.getElementById('phone').value.trim();
             if (num.length < 10) return alert(langData[currentLang].alert);
             if (num.startsWith('0')) num = '94' + num.substring(1);
-            
             const link = "https://kwinproduction.github.io/K-Win-Ecard/";
             const msg = `${langData[currentLang].smsMsg} ${link}`;
-            
             if (type === 'wa') {
                 window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
             } else {
@@ -263,45 +238,6 @@
         }
 
         window.onload = () => setLang('en');
-        // --- PWA Logic (Fixed for Visibility) ---
-        let deferredPrompt;
-        const installBanner = document.getElementById('install-banner');
-
-        // මුලින්ම Banner එක පෙන්නලා තියමු (Force Show)
-        // හැබැයි ඇප් එක දැනටමත් දාලා නම් පෙන්නන එක තේරුමක් නැති නිසා මෙහෙම කරමු:
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            installBanner.style.display = 'none';
-        } else {
-            installBanner.style.display = 'flex';
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBanner.style.display = 'flex'; 
-        });
-
-        document.getElementById('btn-install').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') installBanner.style.display = 'none';
-                deferredPrompt = null;
-            } else {
-                // Prompt එක නැත්නම් Instruction එකක් දෙමු
-                const msg = currentLang === 'si' ? 
-                    "Browser එකේ Menu එකට (තිත් 3) ගොස් 'Install App' හෝ 'Add to Home Screen' තෝරන්න." : 
-                    "Go to Browser Menu (3 dots) and select 'Install App' or 'Add to Home Screen'.";
-                alert(msg);
-            }
-        });
-
-        // Service Worker එක Register වෙන්නම ඕනේ
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
-            });
-        }
     </script>
 </body>
 </html>
