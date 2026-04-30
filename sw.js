@@ -1,61 +1,49 @@
-// වෙබ් අඩවියේ වෙනසක් කළ විට v1 යන්න v2 ලෙස මාරු කරන්න
-const CACHE_NAME = 'k-win-v2'; 
+// Cache එකේ නම සහ Version එක (Update එකක් කරන්න ඕන වුණාම 'v1' වෙනස් කරන්න)
+const CACHE_NAME = 'k-win-cache-v1';
 
-const assets = [
+// Offline වැඩ කිරීමට අවශ්‍ය Files මෙතන ඇතුළත් කරන්න
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  // වැදගත්: මෙතනට අලුත් Logo Link එක ඇතුළත් කළා
-  'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg' 
+  'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg'
 ];
 
-// 1. Install Event
+// 1. Install Event: Files ටික Cache එකට දා ගැනීම
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // අලුත් එක වහාම ඉන්ස්ටෝල් කරන්න
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // මෙහිදී වැදගත් වෙන්නේ assets එකින් එක cache කිරීමයි (එකක් fail වුණත් අනිත් ඒවා වැඩ කිරීමට)
-      return Promise.all(
-        assets.map(url => {
-          return cache.add(url).catch(err => console.log('Fetch failed for:', url));
-        })
-      );
+      console.log('Caching assets...');
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  // අලුත් SW එකක් තිබේ නම් වහාම ක්‍රියාත්මක කරවන්න
+  self.skipWaiting();
 });
 
-// 2. Activate Event - පරණ Cache මැකීම
+// 2. Activate Event: පරණ Cache ඉබේම අයින් කිරීම (Cleanup)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
+            console.log('Deleting old cache:', cache);
             return caches.delete(cache);
           }
         })
       );
     })
   );
+  // අලුත් SW එක පාලනය ලබා ගැනීම
   return self.clients.claim();
 });
 
-// 3. Fetch Event
+// 3. Fetch Event: Offline වෙලාවට Cache එකෙන් දත්ත ලබාදීම
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // තිබේනම් cache එකෙන් ලබාදේ, නැතිනම් ඉන්ටර්නෙට් එකෙන් ලබාගෙන cache එකට දමයි
-      return response || fetch(event.request).then((fetchRes) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          // අලුතින් ගන්නා දත්ත cache එකට එක් කරයි (Dynamic Caching)
-          cache.put(event.request.url, fetchRes.clone());
-          return fetchRes;
-        });
-      });
-    }).catch(() => {
-        // Network සහ Cache දෙකම නැති අවස්ථාවක (Offline) index.html පෙන්වීමට
-        if (event.request.mode === 'navigate') {
-            return caches.match('./index.html');
-        }
+      // Cache එකේ තියෙනවා නම් ඒක දෙනවා, නැත්නම් Network එකෙන් ගන්නවා
+      return response || fetch(event.request);
     })
   );
 });
