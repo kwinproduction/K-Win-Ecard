@@ -263,6 +263,45 @@
         }
 
         window.onload = () => setLang('en');
+        // --- PWA Logic (Fixed for Visibility) ---
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+
+        // මුලින්ම Banner එක පෙන්නලා තියමු (Force Show)
+        // හැබැයි ඇප් එක දැනටමත් දාලා නම් පෙන්නන එක තේරුමක් නැති නිසා මෙහෙම කරමු:
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            installBanner.style.display = 'none';
+        } else {
+            installBanner.style.display = 'flex';
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBanner.style.display = 'flex'; 
+        });
+
+        document.getElementById('btn-install').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') installBanner.style.display = 'none';
+                deferredPrompt = null;
+            } else {
+                // Prompt එක නැත්නම් Instruction එකක් දෙමු
+                const msg = currentLang === 'si' ? 
+                    "Browser එකේ Menu එකට (තිත් 3) ගොස් 'Install App' හෝ 'Add to Home Screen' තෝරන්න." : 
+                    "Go to Browser Menu (3 dots) and select 'Install App' or 'Add to Home Screen'.";
+                alert(msg);
+            }
+        });
+
+        // Service Worker එක Register වෙන්නම ඕනේ
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+            });
+        }
     </script>
 </body>
 </html>
