@@ -1,97 +1,50 @@
-// Cache එකේ නම සහ Version එක (Update එකක් කරන්න ඕන වුණාම 'v1' වෙනස් කරන්න)
-const CACHE_NAME = 'k-win-cache-v1';
+// 1. Version එක - මෙහි අංකය වෙනස් කළ විට පරණ Cache එක Auto Clear වේ
+const CACHE_VERSION = 'v2.1'; 
+const CACHE_NAME = `kwin-cache-${CACHE_VERSION}`;
 
-// Offline වැඩ කිරීමට අවශ්‍ය Files මෙතන ඇතුළත් කරන්න
+// 2. Cache කළ යුතු ගොනු ලැයිස්තුව
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './manifest.json',
   'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg'
 ];
 
-// 1. Install Event: Files ටික Cache එකට දා ගැනීම
+// 3. Service Worker එක Install වීම
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching assets...');
+      console.log('Installing New Cache...');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  // අලුත් SW එකක් තිබේ නම් වහාම ක්‍රියාත්මක කරවන්න
-  self.skipWaiting();
+  self.skipWaiting(); // අලුත් එක වහාම ක්‍රියාත්මක කරවන්න
 });
 
-// 2. Activate Event: පරණ Cache ඉබේම අයින් කිරීම (Cleanup)
+// 4. පරණ Cache Auto-Delete කිරීම (Activate Event)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
+          // අලුත් Cache Name එකට වඩා වෙනස් සියලු පරණ Cache මකා දමන්න
           if (cache !== CACHE_NAME) {
-            console.log('Deleting old cache:', cache);
+            console.log('Deleting Old Cache:', cache);
             return caches.delete(cache);
           }
         })
       );
     })
   );
-  // අලුත් SW එක පාලනය ලබා ගැනීම
   return self.clients.claim();
 });
 
-// 3. Fetch Event: Offline වෙලාවට Cache එකෙන් දත්ත ලබාදීම
+// 5. ගොනු ලබාදීම (Fetch Event)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Cache එකේ තියෙනවා නම් ඒක දෙනවා, නැත්නම් Network එකෙන් ගන්නවා
+      // Cache එකේ ඇත්නම් එය ලබා දෙයි, නැත්නම් Network එකෙන් ලබා ගනී
       return response || fetch(event.request);
     })
   );
 });
-self.addEventListener('install', (e) => {
-  console.log('Service Worker: Installed');
-});
-
-self.addEventListener('fetch', (e) => {
-  // මෙය හිස්ව තිබුණත් කමක් නැත, නමුත් fetch event එක තිබිය යුතුමයි
-});
-const cacheName = 'kwin-v1';
-const staticAssets = ['./', './index.html', './manifest.json'];
-
-self.addEventListener('install', async e => {
-  const cache = await caches.open(cacheName);
-  await cache.addAll(staticAssets);
-  return self.skipWaiting();
-});
-
-self.addEventListener('activate', e => {
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', async e => {
-  const req = e.request;
-  const url = new URL(req.url);
-
-  if (url.origin === location.origin) {
-    e.respondWith(cacheFirst(req));
-  } else {
-    e.respondWith(networkAndCache(req));
-  }
-});
-
-async function cacheFirst(req) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(req);
-  return cached || fetch(req);
-}
-
-async function networkAndCache(req) {
-  const cache = await caches.open(cacheName);
-  try {
-    const fresh = await fetch(req);
-    await cache.put(req, fresh.clone());
-    return fresh;
-  } catch (e) {
-    const cached = await cache.match(req);
-    return cached;
-  }
-}
