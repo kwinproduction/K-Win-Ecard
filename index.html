@@ -211,6 +211,51 @@
             document.getElementById('phone').placeholder = (lang === 'en') ? "07XXXXXXXX" : (lang === 'si' ? "07XXXXXXXX" : "07XXXXXXXX");
         }
 
+        <!-- මීට පෙර ලබාදුන් කේතයේ CSS වල මෙම කොටස වෙනස් කරන්න -->
+<style>
+    #install-banner {
+        display: flex; /* මෙතන flex ලෙස වෙනස් කළා එවිට සැමවිටම පෙනේ */
+        width: 100%; background: var(--accent); color: #000;
+        padding: 12px 20px; justify-content: space-between; align-items: center;
+        font-weight: bold; position: fixed; top: 0; z-index: 9999;
+        box-shadow: 0 4px 15px rgba(255, 218, 0, 0.4);
+    }
+</style>
+
+
+    // --- Service Worker Registration (මෙය අනිවාර්ය වේ) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // කුඩා dummy service worker එකක් create කිරීම
+            const swCode = `self.addEventListener('fetch', function(event) {});`;
+            const blob = new Blob([swCode], {type: 'text/javascript'});
+            const url = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(url);
+        });
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Browser එක Install කරන්න සුදානම් වූ විට මෙතැනට පැමිණේ
+        e.preventDefault();
+        deferredPrompt = e;
+        // Button එක දැනටමත් පෙනෙන නිසා විශේෂයෙන් පෙන්වීමට අවශ්‍ය නැත
+    });
+
+    document.getElementById('btn-install').addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('install-banner').style.display = 'none';
+            }
+            deferredPrompt = null;
+        } else {
+            // Install කිරීමට නොහැකි තත්වයකදී පෙන්වන පණිවිඩය
+            alert("To install: Click Browser Menu (3 dots) -> Add to Home Screen");
+        }
+    });
+
         // --- PWA / Install Logic ---
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
