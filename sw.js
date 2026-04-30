@@ -2,7 +2,7 @@ const CACHE_NAME = 'K-Win';
 const assets = [
   './',
   './index.html',
-  'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg'
+  'https://github.com/kwinproduction/K-Win-Ecard/main/logo.jpeg'
 ];
 
 self.addEventListener('install', e => {
