@@ -269,6 +269,37 @@
         .catch(err => console.log('Registration Failed:', err));
     });
 }
+        // Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js') // 'sw.js' ගොනුව Register කිරීම
+        .then(() => console.log("Service Worker Registered"))
+        .catch(err => console.log("Service Worker Failed", err));
+    });
+}
+
+let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
+
+// Browser එක විසින් Install කිරීමට සුදානම් දැයි බලන Event එක
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('PWA is ready to install');
+    e.preventDefault();
+    deferredPrompt = e;
+    // Install කළ හැකි බව හඳුනාගත් විට පමණක් Button එක පෙන්වයි
+    installBanner.style.display = 'flex'; 
+});
+
+document.getElementById('btn-install').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            installBanner.style.display = 'none';
+        }
+        deferredPrompt = null;
+    }
+});
     </script>
 </body>
 </html>
