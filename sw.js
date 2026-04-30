@@ -1,5 +1,5 @@
 // 1. Version එක - මෙහි අංකය වෙනස් කළ විට පරණ Cache එක Auto Clear වේ
-const CACHE_VERSION = 'v2.1'; 
+const CACHE_VERSION = 'v2.2'; 
 const CACHE_NAME = `kwin-cache-${CACHE_VERSION}`;
 
 // 2. Cache කළ යුතු ගොනු ලැයිස්තුව
@@ -12,24 +12,25 @@ const ASSETS_TO_CACHE = [
 
 // 3. Service Worker එක Install වීම
 self.addEventListener('install', (event) => {
+  console.log('Service Worker: Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Installing New Cache...');
+      console.log('Service Worker: Caching Assets');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting(); // අලුත් එක වහාම ක්‍රියාත්මක කරවන්න
+  self.skipWaiting(); 
 });
 
 // 4. පරණ Cache Auto-Delete කිරීම (Activate Event)
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Activated');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
-          // අලුත් Cache Name එකට වඩා වෙනස් සියලු පරණ Cache මකා දමන්න
           if (cache !== CACHE_NAME) {
-            console.log('Deleting Old Cache:', cache);
+            console.log('Service Worker: Deleting Old Cache...', cache);
             return caches.delete(cache);
           }
         })
@@ -45,13 +46,9 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((response) => {
       // Cache එකේ ඇත්නම් එය ලබා දෙයි, නැත්නම් Network එකෙන් ලබා ගනී
       return response || fetch(event.request);
+    }).catch(() => {
+        // Network එකත් නැත්නම් (Offline නම්) index.html එක පෙන්නන්න පුළුවන්
+        return caches.match('./index.html');
     })
   );
-});
-self.addEventListener('install', (e) => {
-  console.log('Service Worker Installed');
-});
-
-self.addEventListener('fetch', (e) => {
-  // Empty fetch for PWA requirement
 });
