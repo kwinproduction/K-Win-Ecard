@@ -6,6 +6,7 @@ const CACHE_NAME = `kwin-cache-${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './manifest.json',
   'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg'
 ];
 
