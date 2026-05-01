@@ -4,91 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>K-Win</title>
- <!-- K-Win සඳහා පමණක් සකස් කළ Manifest (Base64) -->
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiS1dpbiIsInNob3J0X25hbWUiOiJLLVdpbiIsInN0YXJ0X3VybCI6ImluZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDAwMDAwIiwidGhlbWVfY29sb3ciOiIjZmZkYTAwIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20va3dpbnByb2R1Y3Rpb24vSy1XaW4tRWNhcmQvbWFpbi9sb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiS1dpbiIsInNob3J0X25hbWUiOiJLLVdpbiIsInN0YXJ0X3VybCI6ImluZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDAwMDAwIiwidGhlbWVfY29sb3ciOiIjZmZmZmZmIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20va3dpbnByb2R1Y3Rpb24vSy1XaW4tRWNhcmQvbWFpbi9sb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
     <link rel="icon" type="image/jpeg" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
-    <meta name="theme-color" content="#ffda00">   
+    <meta name="theme-color" content="#ffffff">    
 
     <style>
         :root { 
-            --accent: #ffda00;
-            --bg: #000000;
-            --card: #121212;
-            --text: #ffffff;
+            --accent: #ffffff; 
+            --bg: #000000; 
+            --card: #121212; 
+            --text: #ffffff; 
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        body {
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none; 
             margin: 0; padding: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; overflow-x: hidden;
+        }
+        
+        body, html { 
+            height: 100%; 
+            width: 100%;
+            overflow: hidden; /* ස්ක්‍රෝල් වීම නවත්වයි */
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
         }
 
-        #install-banner {
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between; /* අන්තර්ගතය ඉහළ සිට පහළට විහිදුවයි */
+            padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+        }
+
+        /* PWA Install Banner */
+        #install-banner { 
             display: none; 
-            width: 100%; background: var(--accent); color: #000;
-            padding: 12px 20px; justify-content: space-between; align-items: center;
-            font-weight: bold; position: fixed; top: 0; z-index: 9999;
-            box-shadow: 0 4px 15px rgba(255, 218, 0, 0.4);
+            width: 100%; background: var(--accent); color: #000; 
+            padding: 12px 20px; justify-content: space-between; align-items: center; 
+            font-weight: bold; position: fixed; top: 0; z-index: 9999; 
         }
-        #install-banner button {
-            background: #000; color: var(--accent); border: none;
-            padding: 8px 15px; border-radius: 8px; font-weight: 900; cursor: pointer;
+        #install-banner button { 
+            background: #000; color: var(--accent); border: none; 
+            padding: 8px 15px; border-radius: 8px; font-weight: 900;
         }
 
+        /* Lang Bar */
         .lang-bar { 
-            display: flex; gap: 8px; margin-top: 70px; z-index: 10; 
-            background: #111; padding: 5px; border-radius: 25px; border: 1px solid #222;
+            display: flex; gap: 8px; margin-top: 60px; 
+            background: #111; padding: 5px; border-radius: 25px; border: 1px solid #222; 
         }
-        .lang-btn {
-            background: transparent; color: #888; border: none; padding: 10px 18px;
-            border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: 0.3s;
-            font-weight: bold;
+        .lang-btn { 
+            background: transparent; color: #888; border: none; padding: 8px 15px; 
+            border-radius: 20px; font-size: 0.75rem; cursor: pointer; font-weight: bold; 
         }
         .lang-btn.active { background: var(--accent); color: #000; }
 
-        .header { text-align: center; margin-top: 20px; margin-bottom: 20px; }
-        .logo-circle {
-            width: 110px; height: 110px; border-radius: 50%;
-            border: 4px solid var(--accent); padding: 5px;
-            margin: 0 auto 15px; background: #000; overflow: hidden;
+        .header { text-align: center; margin-top: 10px; }
+        .logo-circle { 
+            width: 90px; height: 90px; border-radius: 50%; 
+            border: 2px solid var(--accent); padding: 4px; 
+            margin: 0 auto 10px; overflow: hidden; 
         }
         .logo-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--accent); font-weight: 900; }
-        .subtitle { font-size: 0.7rem; letter-spacing: 4px; opacity: 0.6; text-transform: uppercase; margin-top: 5px; }
+        h1 { font-size: 1.5rem; letter-spacing: 2px; color: var(--accent); font-weight: 900; }
+        .subtitle { font-size: 0.6rem; letter-spacing: 3px; opacity: 0.6; text-transform: uppercase; }
 
-        .container { width: 90%; max-width: 400px; margin-top: 10px; }
-        .card {
-            background: var(--card); border-radius: 30px; padding: 25px;
-            border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .container { width: 90%; max-width: 380px; }
+        .card { 
+            background: var(--card); border-radius: 25px; padding: 20px; 
+            border: 1px solid #222; 
         }
 
-        .input-group { margin-bottom: 20px; }
-        label { display: block; font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 10px; text-align: center; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.7rem; color: var(--accent); font-weight: bold; margin-bottom: 8px; text-align: center; }
         
-        input {
-            width: 100%; background: #000; border: 2px solid #333;
-            border-radius: 20px; color: var(--accent); padding: 18px;
-            font-size: 2rem; font-weight: bold; text-align: center; transition: 0.3s;
+        input { 
+            width: 100%; background: #000; border: 1px solid #333; 
+            border-radius: 15px; color: var(--accent); padding: 12px; 
+            font-size: 1.1rem; font-weight: bold; text-align: center; 
         }
+        input#phone { font-size: 1.5rem; }
 
-        .btn {
-            width: 100%; padding: 18px; border-radius: 20px; border: none;
-            font-size: 1rem; font-weight: bold; display: flex; align-items: center;
-            justify-content: center; gap: 10px; margin-bottom: 12px; cursor: pointer;
+        .btn { 
+            width: 100%; padding: 15px; border-radius: 15px; border: none; 
+            font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; 
+            justify-content: center; gap: 10px; margin-bottom: 10px; cursor: pointer; 
         }
         .btn-save { background: var(--accent); color: #000; }
         .btn-wa { background: #25D366; color: #fff; }
         .btn-sms { background: #1d9bf0; color: #fff; }
-        .btn:active { transform: scale(0.96); }
+        .btn:active { transform: scale(0.97); }
 
-        .footer { margin-top: auto; padding: 30px 10px; font-size: 0.75rem; opacity: 0.4; text-align: center; line-height: 1.5; }
+        .footer { padding-bottom: 15px; font-size: 0.65rem; opacity: 0.4; text-align: center; }
     </style>
 </head>
 <body>
@@ -115,13 +129,13 @@
     <div class="container">
         <div class="card">
             <div class="input-group">
-                <label id="lbl-phone">Enter Mobile Number</label>
+                <label id="lbl-phone">ENTER MOBILE NUMBER</label>
                 <input type="tel" id="phone" placeholder="07XXXXXXXX" maxlength="10">
             </div>
             <div class="input-group">
-    <label id="lbl-name">Enter Name</label>
-    <input type="text" id="u-name" placeholder="Full Name">
-</div>
+                <label id="lbl-name">ENTER YOUR NAME</label>
+                <input type="text" id="u-name" placeholder="Full Name">
+            </div>
             <button class="btn btn-save" onclick="saveContact()">
                 <span id="btn-save-txt">👤 Save to Contacts</span>
             </button>
@@ -134,35 +148,30 @@
         </div>
     </div>
 
-    <div class="footer" id="txt-footer">
-        Powered by K-Win | Design by Janith Didula
-    </div>
+    <div class="footer" id="txt-footer">Powered by K-Win | Design by Janith Didula</div>
 
     <script>
         const langData = {
             en: {
                 install: "📲 Install K-Win App", installBtn: "INSTALL", subtitle: "Management System",
-                label: "ENTER MOBILE NUMBER", save: "👤 Save to Contacts", wa: "💬 Send WhatsApp",
-                sms: "✉️ Send SMS", 
-                alert: "Please enter a valid number", vcardName: "K-Win Client",
-                smsMsg: "Get your K-Win Digital Card here:"
-                nameLabel: "ENTER YOUR NAME",
+                label: "ENTER MOBILE NUMBER", nameLabel: "ENTER YOUR NAME", save: "👤 Save to Contacts", 
+                wa: "💬 Send WhatsApp", sms: "✉️ Send SMS", alert: "Please enter a valid number",
+                vcardName: "K-Win Client", smsMsg: "Get your K-Win Digital Card here:",
+                footer: "Powered by K-Win | Design by Janith Didula"
             },
             si: {
                 install: "📲 K-Win ඇප් එක ලබාගන්න", installBtn: "පිහිටුවන්න", subtitle: "කළමනාකරණ පද්ධතිය",
-                label: "දුරකථන අංකය ඇතුළත් කරන්න", save: "👤 සම්බන්ධතාවලට එක් කරන්න", wa: "💬 Send WhatsApp",
-                sms: "✉️ Send SMS", 
-                alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න", vcardName: "K-Win සේවාලාභියා",
-                smsMsg: "ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න:"
-                nameLabel: "ඔබේ නම ඇතුළත් කරන්න",
+                label: "දුරකථන අංකය ඇතුළත් කරන්න", nameLabel: "ඔබේ නම ඇතුළත් කරන්න", save: "👤 සම්බන්ධතාවලට එක් කරන්න", 
+                wa: "💬 WhatsApp පණිවිඩයක් යවන්න", sms: "✉️ SMS එකක් යවන්න", alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න",
+                vcardName: "K-Win සේවාලාභියා", smsMsg: "ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න:",
+                footer: "K-Win වෙතින් | ජනිත් දිදුලගේ නිර්මාණයකි"
             },
             ta: {
                 install: "📲 K-Win செயலியை நிறுவவும்", installBtn: "நிறுவவும்", subtitle: "மேலாண்மை அமைப்பு",
-                label: "கைபேசி எண்ணை உள்ளிடவும்", save: "👤 தொடர்புகளில் சேமிக்கவும்", wa: "💬 Send WhatsApp",
-                sms: "✉️ Send SMS", 
-                alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்", vcardName: "K-Win கிளையண்ட்",
-                smsMsg: "உங்கள் K-Win டிஜிட்டல் கார்டை இங்கே பெறுங்கள்:"
-                nameLabel: "உங்கள் பெயரை உள்ளிடவும்",
+                label: "கைபேசி எண்ணை உள்ளிடவும்", nameLabel: "உங்கள் பெயரை உள்ளிடவும்", save: "👤 தொடர்புகளில் சேமிக்கவும்", 
+                wa: "💬 WhatsApp அனுப்பவும்", sms: "✉️ SMS அனுப்பவும்", alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்",
+                vcardName: "K-Win கிளையண்ட்", smsMsg: "உங்கள் K-Win டிஜிட்டல் கார்டை இங்கே பெறுங்கள்:",
+                footer: "K-Win மூலம் இயக்கப்படுகிறது | வடிவமைப்பு: ஜனிත් திதுல"
             }
         };
 
@@ -174,23 +183,21 @@
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btn-' + lang).classList.add('active');
+            
             document.getElementById('txt-install-msg').innerText = langData[lang].install;
             document.getElementById('btn-install').innerText = langData[lang].installBtn;
             document.getElementById('txt-subtitle').innerText = langData[lang].subtitle;
             document.getElementById('lbl-phone').innerText = langData[lang].label;
+            document.getElementById('lbl-name').innerText = langData[lang].nameLabel;
             document.getElementById('btn-save-txt').innerText = langData[lang].save;
             document.getElementById('btn-wa-txt').innerText = langData[lang].wa;
             document.getElementById('btn-sms-txt').innerText = langData[lang].sms;
             document.getElementById('txt-footer').innerText = langData[lang].footer;
-            document.getElementById('lbl-name').innerText = translations[lang].nameLabel;
         }
 
-        // --- PWA Logic ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW Registered'))
-                    .catch(err => console.log('SW Registration Failed', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail', err));
             });
         }
 
@@ -206,20 +213,15 @@
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') installBanner.style.display = 'none';
                 deferredPrompt = null;
-            } else {
-                const msg = currentLang === 'si' ? 
-                    "Browser Menu (තිත් 3) හරහා 'Install' හෝ 'Add to Home Screen' තෝරන්න." : 
-                    "Please use Browser Menu (3 dots) to 'Install' or 'Add to Home Screen'.";
-                alert(msg);
             }
         });
 
-        // --- Contact Functions ---
         function saveContact() {
             const num = document.getElementById('phone').value.trim();
+            const uName = document.getElementById('u-name').value.trim();
             if (num.length < 10) return alert(langData[currentLang].alert);
-            const name = langData[currentLang].vcardName;
-            const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
+            const finalName = uName || langData[currentLang].vcardName;
+            const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${finalName}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
             const blob = new Blob([vcard], { type: "text/vcard" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
