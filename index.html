@@ -18,7 +18,38 @@
 <meta name="apple-mobile-web-app-title" content="K-Win">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <style>
+        /* iPhone Safari නෙවෙයි නම් විතරක් පේන Overlay එක */
+#safari-only-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #050a14; /* Dark Background */
+    z-index: 100000;
+    color: white;
+    padding: 30px;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.safari-icon { width: 80px; margin-bottom: 20px; }
+
+.instruction-step {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 15px;
+    margin: 10px 0;
+    width: 100%;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.highlight-gold { color: #ffcc00; font-weight: bold; }
         :root { 
     --accent: #ffffff; 
     --bg: #000000; /* True Black */
@@ -122,20 +153,22 @@ body {
         <button id="btn-install">INSTALL</button>
     </div>
 
-<div id="ios-overlay" style="display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px);">
-    <div style="background: white; color: #111; width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 30px 30px 0 0; text-align: center; animation: slideUp 0.4s ease-out;">
-        <h3 style="margin: 0 0 15px 0;">iPhone එකට K-Win App Install කරන්න 📲</h3>
-        <p style="font-size: 15px; margin-bottom: 25px; line-height: 1.5;">
-            පහළ තියෙන <b>Share</b> අයිකනය ඔබලා, <br>
-            <b>'Add to Home Screen'</b> තෝරන්න.
-        </p>
-        <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; display: inline-flex; align-items: center; gap: 15px;">
-            <img src="https://cdn-icons-png.flaticon.com/512/1053/1053079.png" width="30">
-            <span style="font-weight: bold;">➔</span>
-            <img src="https://cdn-icons-png.flaticon.com/512/262/262038.png" width="30">
-        </div>
-        <button onclick="document.getElementById('ios-overlay').style.display='none'" style="display: block; width: 100%; margin-top: 25px; background: #007bff; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer;">හරි, තේරුණා!</button>
+<div id="safari-only-overlay">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg" class="safari-icon" alt="Safari">
+    
+    <h2 style="color: #ffcc00;">Safari භාවිතා කරන්න</h2>
+    
+    <p style="opacity: 0.8;">ඔබ දැනට සිටින්නේ වෙනත් App එකක බ්‍රවුසරය තුළයි. මෙය Install කිරීමට නම්:</p>
+
+    <div class="instruction-step">
+        1️⃣ ඉහළ දකුණු කෙළවරේ ඇති <span class="highlight-gold">තිත් තුන (•••)</span> හෝ <span class="highlight-gold">Share</span> අයිකනය ඔබන්න.
     </div>
+
+    <div class="instruction-step">
+        2️⃣ ලැයිස්තුවෙන් <span class="highlight-gold">"Open in Safari"</span> හෝ <span class="highlight-gold">"Open in System Browser"</span> තෝරන්න.
+    </div>
+
+    <p style="font-size: 12px; margin-top: 20px; opacity: 0.6;">Safari හරහා පිවිසි විට පමණක් App එක Install කළ හැක.</p>
 </div>
     <div class="lang-bar">
         <button id="btn-en" class="lang-btn active" onclick="setLang('en')">English</button>
@@ -289,6 +322,24 @@ pwaBtn.addEventListener('click', async () => {
         }
     }
 });
+        function enforceSafariOnIphone() {
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isIphone = /iphone|ipad|ipod/.test(ua);
+    
+    // iPhone එකක්ද සහ Safari ද කියා පරීක්ෂා කිරීම
+    // chrome, crios, fxios (firefox) වැනි වචන නැති නම් එය Safari වේ
+    const isSafari = ua.includes('safari') && !ua.includes('chrome') && !ua.includes('crios') && !ua.includes('fxios') && !ua.includes('android');
+
+    // Standalone mode එකේ (Install කරලා) නම් මේක පෙන්වන්න අවශ්‍ය නැහැ
+    const isStandalone = window.navigator.standalone === true;
+
+    if (isIphone && !isSafari && !isStandalone) {
+        document.getElementById('safari-only-overlay').style.display = 'flex';
+    }
+}
+
+// Page එක load වූ වහාම ක්‍රියාත්මක කරන්න
+window.addEventListener('load', enforceSafariOnIphone);
     </script>
 </body>
 </html>
