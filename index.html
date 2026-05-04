@@ -30,15 +30,16 @@
             padding: 8px 15px; border-radius: 8px; font-weight: 900; cursor: pointer;
         }
 
-        /* iOS Profile Instruction Overlay */
-        #ios-profile-overlay {
+        /* iOS Instruction Overlay */
+        #ios-instructions {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #050a14; z-index: 100000; color: white; padding: 30px;
+            background: rgba(0, 0, 0, 0.96); z-index: 100000; color: white; padding: 30px;
             box-sizing: border-box; text-align: center; justify-content: center; flex-direction: column; align-items: center;
+            backdrop-filter: blur(10px);
         }
         .instruction-step { 
-            background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; 
-            margin: 10px 0; width: 100%; font-size: 14px; border: 1px solid rgba(255, 255, 255, 0.1); 
+            background: rgba(255, 255, 255, 0.08); padding: 18px; border-radius: 15px; 
+            margin: 12px 0; width: 100%; font-size: 15px; border: 1px solid rgba(255, 255, 255, 0.1); 
         }
         .highlight-gold { color: #ffcc00; font-weight: bold; }
 
@@ -77,14 +78,13 @@
         <button id="btn-install" onclick="handleInstallClick()">INSTALL</button>
     </div>
 
-    <!-- Apple Profile Instructions -->
-    <div id="ios-profile-overlay">
-        <h2 style="color: #ffcc00; margin-bottom: 10px;">K-Win Installer (Apple)</h2>
-        <p style="opacity: 0.8; font-size: 14px; margin-bottom: 15px;">App එක Install කිරීමට පහත පියවර අනුගමනය කරන්න:</p>
-        <div class="instruction-step">1️⃣ දැන් Settings (සැකසුම්) වෙත යන්න.</div>
-        <div class="instruction-step">2️⃣ <span class="highlight-gold">"Profile Downloaded"</span> පණිවිඩය ක්ලික් කරන්න.</div>
-        <div class="instruction-step">3️⃣ එහි ඉහළ ඇති <span class="highlight-gold">Install</span> බොත්තම ඔබන්න.</div>
-        <button class="btn btn-save" style="margin-top: 20px; width: auto; padding: 10px 30px;" onclick="document.getElementById('ios-profile-overlay').style.display='none'">සම්පූර්ණයි ✅</button>
+    <!-- iOS Dynamic Instruction Overlay -->
+    <div id="ios-instructions">
+        <h2 id="ios-title" style="color: #ffcc00; margin-bottom: 15px;">Add to Home Screen</h2>
+        <div id="ios-steps-container">
+            <!-- Steps will be injected by JavaScript -->
+        </div>
+        <button class="btn btn-save" style="margin-top: 25px; width: auto; padding: 12px 40px;" onclick="document.getElementById('ios-instructions').style.display='none'">සම්පූර්ණයි ✅</button>
     </div>
 
     <div class="lang-bar">
@@ -136,14 +136,14 @@
                 footer: "Powered by K-Win | Design by Janith Didula"
             },
             si: {
-                install: "📲 K-Win ඇප් එක ලබාගන්න", installBtn: "පිහිටුවන්න", subtitle: "කළමනාකරණ පද්ධතිය",
+                install: "📲 Shortcut එකක් සාදාගන්න", installBtn: "INSTALL", subtitle: "කළමනාකරණ පද්ධතිය",
                 label: "දුරකථන අංකය ඇතුළත් කරන්න", nameLabel: "නම ඇතුළත් කරන්න", save: "👤 සම්බන්ධතාවලට එක් කරන්න", 
                 wa: "💬 WhatsApp පණිවිඩයක් යවන්න", sms: "✉️ SMS එකක් යවන්න", alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න",
                 vcardName: "K-Win සේවාලාභියා", smsMsg: "ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න:",
                 footer: "K-Win වෙතින් | ජනිත් දිදුලගේ නිර්මාණයකි"
             },
             ta: {
-                install: "📲 K-Win செயலியை நிறுவவும்", installBtn: "நிறுவவும்", subtitle: "மேலாண்மை அமைப்பு",
+                install: "📲 குறுக்குவழியை உருவாக்கவும்", installBtn: "நிறுවவும்", subtitle: "மேலாண்மை அமைப்பு",
                 label: "கைபேசி எண்ணை உள்ளிடவும்", nameLabel: "பெயரை உள்ளிடவும்", save: "👤 தொடர்புகளில் சேமிக்கவும்", 
                 wa: "💬 WhatsApp அனுப்பவும்", sms: "✉️ SMS அனுப்பவும்", alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்",
                 vcardName: "K-Win கிளையண்ட்", smsMsg: "உங்கள் K-Win டிஜிட்டல் கார்டை இங்கே பெறுங்கள்:",
@@ -170,7 +170,7 @@
             document.getElementById('txt-footer').innerText = langData[lang].footer;
         }
 
-        // --- PWA & Installation Logic ---
+        // --- PWA Logic ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail', err));
@@ -183,49 +183,46 @@
             document.getElementById('install-banner').style.display = 'flex';
         });
 
-        async function handleInstallClick() {
-            const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        // --- iOS Detection & Instruction Handler ---
+        function handleInstallClick() {
+            const ua = window.navigator.userAgent.toLowerCase();
+            const isIos = /iphone|ipad|ipod/.test(ua);
+            const isChromeIos = /crios/.test(ua); // Chrome on iOS detects 'crios'
 
             if (isIos) {
-                // Download iOS Configuration Profile
-                const profileXml = `<?xml version="1.0" encoding="UTF-8"?>
-                <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-                <plist version="1.0">
-                <dict>
-                    <key>PayloadContent</key>
-                    <array>
-                        <dict>
-                            <key>FullScreen</key><true/>
-                            <key>Icon</key><data></data>
-                            <key>IsRemovable</key><true/>
-                            <key>Label</key><string>K-Win</string>
-                            <key>PayloadType</key><string>com.apple.webClip.managed</string>
-                            <key>PayloadUUID</key><string>123e4567-e89b-12d3-a456-426614174000</string>
-                            <key>PayloadVersion</key><integer>1</integer>
-                            <key>URL</key><string>${window.location.href}</string>
-                        </dict>
-                    </array>
-                    <key>PayloadDisplayName</key><string>K-Win Installer</string>
-                    <key>PayloadIdentifier</key><string>com.kwin.installer</string>
-                    <key>PayloadType</key><string>Configuration</string>
-                    <key>PayloadUUID</key><string>123e4567-e89b-12d3-a456-426614174001</string>
-                    <key>PayloadVersion</key><integer>1</integer>
-                </dict>
-                </plist>`;
-                const blob = new Blob([profileXml], { type: 'application/x-apple-aspen-config' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'K-Win.mobileconfig';
-                a.click();
-                document.getElementById('ios-profile-overlay').style.display = 'flex';
+                const container = document.getElementById('ios-steps-container');
+                let stepsHtml = '';
+
+                if (isChromeIos) {
+                    // iPhone - Chrome Instructions
+                    stepsHtml = `
+                        <p style="opacity: 0.9; margin-bottom: 15px;">Chrome හරහා Shortcut එකක් සාදාගන්න:</p>
+                        <div class="instruction-step">1️⃣ ඉහළ දකුණු කෙළවරේ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
+                        <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
+                        <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
+                    `;
+                } else {
+                    // iPhone - Safari Instructions
+                    stepsHtml = `
+                        <p style="opacity: 0.9; margin-bottom: 15px;">Safari හරහා Shortcut එකක් සාදාගන්න:</p>
+                        <div class="instruction-step">1️⃣ පහළ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
+                        <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
+                        <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
+                    `;
+                }
+                
+                container.innerHTML = stepsHtml;
+                document.getElementById('ios-instructions').style.display = 'flex';
+                
             } else if (deferredPrompt) {
+                // Android Logic (Unchanged)
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') document.getElementById('install-banner').style.display = 'none';
-                deferredPrompt = null;
+                deferredPrompt.userChoice.then((choice) => {
+                    if (choice.outcome === 'accepted') document.getElementById('install-banner').style.display = 'none';
+                    deferredPrompt = null;
+                });
             } else {
-                alert("Please use the 'Add to Home Screen' option in your browser menu.");
+                alert("Please use 'Add to Home Screen' from your browser menu.");
             }
         }
 
@@ -253,16 +250,17 @@
             if (type === 'wa') {
                 window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
             } else {
-                const sep = (navigator.userAgent.match(/iPhone|iPad|iPod/i)) ? '&' : '?';
+                const sep = (navigator.userAgent.match(/iphone|ipad|ipod/i)) ? '&' : '?';
                 window.location.href = `sms:+${num}${sep}body=${encodeURIComponent(msg)}`;
             }
         }
 
         window.onload = () => {
             setLang('en');
-            // Show banner for iPhone if not already installed
-            const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-            const isStandalone = window.navigator.standalone === true;
+            const ua = window.navigator.userAgent.toLowerCase();
+            const isIos = /iphone|ipad|ipod/.test(ua);
+            const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+            
             if (isIos && !isStandalone) {
                 document.getElementById('install-banner').style.display = 'flex';
             }
