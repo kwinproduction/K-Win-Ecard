@@ -9,167 +9,84 @@
     <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiS1dpbiIsInNob3J0X25hbWUiOiJLLVdpbiIsInN0YXJ0X3VybCI6ImluZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDAwMDAwIiwidGhlbWVfY29sb3ciOiIjZmZmZmZmIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20va3dpbnByb2R1Y3Rpb24vSy1XaW4tRWNhcmQvbWFpbi9sb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
     <link rel="icon" type="image/jpeg" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
     <meta name="theme-color" content="#ffffff">    
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<meta name="apple-mobile-web-app-title" content="K-Win">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <style>
-        /* iPhone Safari නෙවෙයි නම් විතරක් පේන Overlay එක */
-#safari-only-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #050a14; /* Dark Background */
-    z-index: 100000;
-    color: white;
-    padding: 30px;
-    box-sizing: border-box;
-    text-align: center;
-    font-family: 'Segoe UI', sans-serif;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-}
+        :root { --accent: #ffffff; --bg: #000000; --card: #121212; --text: #ffffff; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        body, html { height: 100%; width: 100%; background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
+        body { display: flex; flex-direction: column; align-items: center; padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px; }
 
-.safari-icon { width: 80px; margin-bottom: 20px; }
-
-.instruction-step {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 15px;
-    margin: 10px 0;
-    width: 100%;
-    font-size: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.highlight-gold { color: #ffcc00; font-weight: bold; }
-        :root { 
-    --accent: #ffffff; 
-    --bg: #000000; /* True Black */
-    --card: #121212; 
-    --text: #ffffff;  
-}
-
-* { 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
-    outline: none; 
-    margin: 0; 
-    padding: 0;
-}
-
-body, html { 
-    height: 100%; 
-    width: 100%;
-    overflow: hidden; 
-    background-color: var(--bg); 
-    color: var(--text); 
-    font-family: 'Segoe UI', Roboto, sans-serif; 
-}
-
-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between; 
-    /* Mobile notch saha bottom bar walata ida thiyanna */
-    padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px; 
-}
         /* PWA Install Banner */
         #install-banner { 
-            display: none; 
-            width: 100%; background: var(--accent); color: #000; 
+            display: none; width: 100%; background: var(--accent); color: #000; 
             padding: 12px 20px; justify-content: space-between; align-items: center; 
-            font-weight: bold; position: fixed; top: 0; z-index: 9999; 
+            font-weight: bold; position: fixed; top: 0; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         #install-banner button { 
             background: #000; color: var(--accent); border: none; 
-            padding: 8px 15px; border-radius: 8px; font-weight: 900;
+            padding: 8px 15px; border-radius: 8px; font-weight: 900; cursor: pointer;
         }
 
-        /* Lang Bar */
-        .lang-bar { 
-            display: flex; gap: 8px; margin-top: 60px; 
-            background: #111; padding: 5px; border-radius: 25px; border: 1px solid #222; 
+        /* iOS Profile Instruction Overlay */
+        #ios-profile-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #050a14; z-index: 100000; color: white; padding: 30px;
+            box-sizing: border-box; text-align: center; justify-content: center; flex-direction: column; align-items: center;
         }
-        .lang-btn { 
-            background: transparent; color: #888; border: none; padding: 8px 15px; 
-            border-radius: 20px; font-size: 0.75rem; cursor: pointer; font-weight: bold; 
+        .instruction-step { 
+            background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; 
+            margin: 10px 0; width: 100%; font-size: 14px; border: 1px solid rgba(255, 255, 255, 0.1); 
         }
+        .highlight-gold { color: #ffcc00; font-weight: bold; }
+
+        /* UI Elements */
+        .lang-bar { display: flex; gap: 8px; margin-top: 70px; background: #111; padding: 5px; border-radius: 25px; border: 1px solid #222; }
+        .lang-btn { background: transparent; color: #888; border: none; padding: 8px 15px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
         .lang-btn.active { background: var(--accent); color: #000; }
 
-        .header { text-align: center; margin-top: 10px; }
-        .logo-circle { 
-            width: 90px; height: 90px; border-radius: 50%; 
-            border: 2px solid var(--accent); padding: 4px; 
-            margin: 0 auto 10px; overflow: hidden; 
-        }
+        .header { text-align: center; margin-top: 20px; }
+        .logo-circle { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--accent); padding: 4px; margin: 0 auto 10px; overflow: hidden; }
         .logo-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-
         h1 { font-size: 1.5rem; letter-spacing: 2px; color: var(--accent); font-weight: 900; }
-        .subtitle { font-size: 0.6rem; letter-spacing: 3px; opacity: 0.6; text-transform: uppercase; }
 
-        .container { width: 90%; max-width: 380px; }
-        .card { 
-            background: var(--card); border-radius: 25px; padding: 20px; 
-            border: 1px solid #222; 
-        }
+        .container { width: 100%; max-width: 380px; margin-top: 20px; }
+        .card { background: var(--card); border-radius: 25px; padding: 25px; border: 1px solid #222; }
 
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.7rem; color: var(--accent); font-weight: bold; margin-bottom: 8px; text-align: center; }
-        
-        input { 
-            width: 100%; background: #000; border: 1px solid #333; 
-            border-radius: 15px; color: var(--accent); padding: 12px; 
-            font-size: 1.1rem; font-weight: bold; text-align: center; 
-        }
-        input#phone { font-size: 1.5rem; }
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-size: 0.7rem; color: var(--accent); font-weight: bold; margin-bottom: 8px; text-align: center; opacity: 0.8; }
+        input { width: 100%; background: #000; border: 1px solid #333; border-radius: 15px; color: var(--accent); padding: 14px; font-size: 1.1rem; font-weight: bold; text-align: center; }
+        input#phone { font-size: 1.4rem; letter-spacing: 1px; }
 
-        .btn { 
-            width: 100%; padding: 15px; border-radius: 15px; border: none; 
-            font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; 
-            justify-content: center; gap: 10px; margin-bottom: 10px; cursor: pointer; 
-        }
+        .btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
         .btn-save { background: var(--accent); color: #000; }
         .btn-wa { background: #25D366; color: #fff; }
         .btn-sms { background: #1d9bf0; color: #fff; }
-        .btn:active { transform: scale(0.97); }
+        .btn:active { transform: scale(0.96); }
 
-        .footer { padding-bottom: 15px; font-size: 0.65rem; opacity: 0.4; text-align: center; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .footer { margin-top: 30px; padding-bottom: 20px; font-size: 0.65rem; opacity: 0.4; text-align: center; width: 100%; }
     </style>
 </head>
 <body>
 
+    <!-- Installation Banner -->
     <div id="install-banner">
         <span id="txt-install-msg">📲 Install K-Win App</span>
-        <button id="btn-install">INSTALL</button>
+        <button id="btn-install" onclick="handleInstallClick()">INSTALL</button>
     </div>
 
-<div id="safari-only-overlay">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg" class="safari-icon" alt="Safari">
-    
-    <h2 style="color: #ffcc00;">Safari භාවිතා කරන්න</h2>
-    
-    <p style="opacity: 0.8;">ඔබ දැනට සිටින්නේ වෙනත් App එකක බ්‍රවුසරය තුළයි. මෙය Install කිරීමට නම්:</p>
-
-    <div class="instruction-step">
-        1️⃣ ඉහළ දකුණු කෙළවරේ ඇති <span class="highlight-gold">තිත් තුන (•••)</span> හෝ <span class="highlight-gold">Share</span> අයිකනය ඔබන්න.
+    <!-- Apple Profile Instructions -->
+    <div id="ios-profile-overlay">
+        <h2 style="color: #ffcc00; margin-bottom: 10px;">K-Win Installer (Apple)</h2>
+        <p style="opacity: 0.8; font-size: 14px; margin-bottom: 15px;">App එක Install කිරීමට පහත පියවර අනුගමනය කරන්න:</p>
+        <div class="instruction-step">1️⃣ දැන් Settings (සැකසුම්) වෙත යන්න.</div>
+        <div class="instruction-step">2️⃣ <span class="highlight-gold">"Profile Downloaded"</span> පණිවිඩය ක්ලික් කරන්න.</div>
+        <div class="instruction-step">3️⃣ එහි ඉහළ ඇති <span class="highlight-gold">Install</span> බොත්තම ඔබන්න.</div>
+        <button class="btn btn-save" style="margin-top: 20px; width: auto; padding: 10px 30px;" onclick="document.getElementById('ios-profile-overlay').style.display='none'">සම්පූර්ණයි ✅</button>
     </div>
 
-    <div class="instruction-step">
-        2️⃣ ලැයිස්තුවෙන් <span class="highlight-gold">"Open in Safari"</span> හෝ <span class="highlight-gold">"Open in System Browser"</span> තෝරන්න.
-    </div>
-
-    <p style="font-size: 12px; margin-top: 20px; opacity: 0.6;">Safari හරහා පිවිසි විට පමණක් App එක Install කළ හැක.</p>
-</div>
     <div class="lang-bar">
         <button id="btn-en" class="lang-btn active" onclick="setLang('en')">English</button>
         <button id="btn-si" class="lang-btn" onclick="setLang('si')">සිංහල</button>
@@ -181,7 +98,9 @@ body {
             <img src="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg" alt="Logo">
         </div>
         <h1>Kind Win</h1>
+        <p id="txt-subtitle" style="font-size: 0.6rem; letter-spacing: 3px; opacity: 0.6; text-transform: uppercase;">Management System</p>
     </div>
+
     <div class="container">
         <div class="card">
             <div class="input-group">
@@ -189,9 +108,10 @@ body {
                 <input type="tel" id="phone" placeholder="07XXXXXXXX" maxlength="10">
             </div>
             <div class="input-group">
-                <label id="lbl-name">ENTER NAME</label>
+                <label id="lbl-name">ENTER YOUR NAME</label>
                 <input type="text" id="u-name" placeholder="Full Name">
             </div>
+            
             <button class="btn btn-save" onclick="saveContact()">
                 <span id="btn-save-txt">👤 Save to Contacts</span>
             </button>
@@ -233,7 +153,6 @@ body {
 
         let currentLang = 'en';
         let deferredPrompt;
-        const installBanner = document.getElementById('install-banner');
 
         function setLang(lang) {
             currentLang = lang;
@@ -251,6 +170,7 @@ body {
             document.getElementById('txt-footer').innerText = langData[lang].footer;
         }
 
+        // --- PWA & Installation Logic ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail', err));
@@ -260,18 +180,56 @@ body {
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installBanner.style.display = 'flex';
+            document.getElementById('install-banner').style.display = 'flex';
         });
 
-        document.getElementById('btn-install').addEventListener('click', async () => {
-            if (deferredPrompt) {
+        async function handleInstallClick() {
+            const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+            if (isIos) {
+                // Download iOS Configuration Profile
+                const profileXml = `<?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+                <plist version="1.0">
+                <dict>
+                    <key>PayloadContent</key>
+                    <array>
+                        <dict>
+                            <key>FullScreen</key><true/>
+                            <key>Icon</key><data></data>
+                            <key>IsRemovable</key><true/>
+                            <key>Label</key><string>K-Win</string>
+                            <key>PayloadType</key><string>com.apple.webClip.managed</string>
+                            <key>PayloadUUID</key><string>123e4567-e89b-12d3-a456-426614174000</string>
+                            <key>PayloadVersion</key><integer>1</integer>
+                            <key>URL</key><string>${window.location.href}</string>
+                        </dict>
+                    </array>
+                    <key>PayloadDisplayName</key><string>K-Win Installer</string>
+                    <key>PayloadIdentifier</key><string>com.kwin.installer</string>
+                    <key>PayloadType</key><string>Configuration</string>
+                    <key>PayloadUUID</key><string>123e4567-e89b-12d3-a456-426614174001</string>
+                    <key>PayloadVersion</key><integer>1</integer>
+                </dict>
+                </plist>`;
+                const blob = new Blob([profileXml], { type: 'application/x-apple-aspen-config' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'K-Win.mobileconfig';
+                a.click();
+                document.getElementById('ios-profile-overlay').style.display = 'flex';
+            } else if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') installBanner.style.display = 'none';
+                if (outcome === 'accepted') document.getElementById('install-banner').style.display = 'none';
                 deferredPrompt = null;
+            } else {
+                alert("Please use the 'Add to Home Screen' option in your browser menu.");
             }
-        });
+        }
 
+        // --- Core Functions ---
         function saveContact() {
             const num = document.getElementById('phone').value.trim();
             const uName = document.getElementById('u-name').value.trim();
@@ -300,46 +258,15 @@ body {
             }
         }
 
-        window.onload = () => setLang('en');
-const pwaBtn = document.getElementById('btn-install-main');
-
-pwaBtn.addEventListener('click', async () => {
-    // 1. iPhone එකක්ද කියලා බලනවා
-    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-
-    if (isIos) {
-        // iPhone එකක් නම් කෙලින්ම අපේ ලස්සන Popup එක පෙන්වනවා
-        document.getElementById('ios-overlay').style.display = 'flex';
-    } else {
-        // Android නම් කලින් වගේම Install Prompt එක පෙන්වනවා
-        if (window.deferredPrompt) {
-            window.deferredPrompt.prompt();
-            const { outcome } = await window.deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                document.getElementById('pwa-installer').style.display = 'none';
+        window.onload = () => {
+            setLang('en');
+            // Show banner for iPhone if not already installed
+            const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+            const isStandalone = window.navigator.standalone === true;
+            if (isIos && !isStandalone) {
+                document.getElementById('install-banner').style.display = 'flex';
             }
-            window.deferredPrompt = null;
-        }
-    }
-});
-        function enforceSafariOnIphone() {
-    const ua = window.navigator.userAgent.toLowerCase();
-    const isIphone = /iphone|ipad|ipod/.test(ua);
-    
-    // iPhone එකක්ද සහ Safari ද කියා පරීක්ෂා කිරීම
-    // chrome, crios, fxios (firefox) වැනි වචන නැති නම් එය Safari වේ
-    const isSafari = ua.includes('safari') && !ua.includes('chrome') && !ua.includes('crios') && !ua.includes('fxios') && !ua.includes('android');
-
-    // Standalone mode එකේ (Install කරලා) නම් මේක පෙන්වන්න අවශ්‍ය නැහැ
-    const isStandalone = window.navigator.standalone === true;
-
-    if (isIphone && !isSafari && !isStandalone) {
-        document.getElementById('safari-only-overlay').style.display = 'flex';
-    }
-}
-
-// Page එක load වූ වහාම ක්‍රියාත්මක කරන්න
-window.addEventListener('load', enforceSafariOnIphone);
+        };
     </script>
 </body>
 </html>
