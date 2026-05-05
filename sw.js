@@ -1,5 +1,5 @@
 // 1. Version එක - මෙහි අංකය වෙනස් කළ විට පරණ Cache එක Auto Clear වේ
-const CACHE_VERSION = 'v2.13'; 
+const CACHE_VERSION = 'v2.14'; 
 const CACHE_NAME = `kwin-cache-${CACHE_VERSION}`;
 
 // 2. Cache කළ යුතු ගොනු ලැයිස්තුව
