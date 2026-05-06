@@ -66,6 +66,11 @@
         .btn-wa { background: #25D366; color: #fff; }
         .btn-sms { background: #1d9bf0; color: #fff; }
         .btn:active { transform: scale(0.96); }
+        
+        .btn:active {
+    transform: scale(0.95); /* Button එක මදක් කුඩා වේ */
+    transition: transform 0.1s ease; /* ඉතා වේගයෙන් සිදුවීමට */
+}
 
         .footer { margin-top: 30px; padding-bottom: 20px; font-size: 0.65rem; opacity: 0.4; text-align: center; width: 100%; }
     </style>
@@ -225,6 +230,34 @@
                 alert("Please use 'Add to Home Screen' from your browser menu.");
             }
         }
+        /* සියලුම Button සඳහා පොදුවේ */
+.btn {
+    transition: all 0.1s ease; /* ඉතා වේගයෙන් වෙනස් වීමට */
+    cursor: pointer;
+    position: relative;
+    top: 0;
+}
+
+/* Button එක උඩට ඇඟිල්ල ගෙනියන විට (Hover) */
+.btn:hover {
+    filter: brightness(1.1); /* මදක් පැහැපත් වේ */
+}
+
+/* Button එක Click කරන මොහොතේ (Active State) */
+.btn:active {
+    transform: scale(0.92); /* මදක් කුඩා වේ (එබෙන හැඟීම) */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* සෙවනැල්ල අඩු වේ */
+    top: 3px; /* මදක් පහළට යයි */
+}
+        // සියලුම Button වලට Touch Vibrations එක් කිරීම
+document.addEventListener('click', function(e) {
+    // ඔබා ඇත්තේ Button එකක් හෝ Button එකක් ඇතුළේ ඇති Span එකක් නම්
+    if (e.target.closest('.btn') || e.target.tagName === 'BUTTON') {
+        if (navigator.vibrate) {
+            navigator.vibrate(40); // මිලි තත්පර 40ක සුළු වෙව්ලීමක්
+        }
+    }
+});
 
         // --- Core Functions ---
         function saveContact() {
