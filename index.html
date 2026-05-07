@@ -231,25 +231,11 @@ body {
             }
         };
 
-        let currentLang = 'en';
-        let deferredPrompt;
+      let currentLang = 'en';
+let deferredPrompt;
 
-        function setLang(lang) {
-            currentLang = lang;
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + lang).classList.add('active');
-            
-            document.getElementById('txt-install-msg').innerText = langData[lang].install;
-            document.getElementById('btn-install').innerText = langData[lang].installBtn;
-            document.getElementById('txt-subtitle').innerText = langData[lang].subtitle;
-            document.getElementById('lbl-phone').innerText = langData[lang].label;
-            document.getElementById('lbl-name').innerText = langData[lang].nameLabel;
-            document.getElementById('btn-save-txt').innerText = langData[lang].save;
-            document.getElementById('btn-wa-txt').innerText = langData[lang].wa;
-            document.getElementById('btn-sms-txt').innerText = langData[lang].sms;
-            document.getElementById('txt-footer').innerText = langData[lang].footer;
-        }
-        function setLang(lang) {
+// මේ අලුත් function එක පමණක් තබා ගන්න
+function setLang(lang) {
     currentLang = lang;
     
     // Active Button එක මාරු කිරීම
@@ -257,12 +243,13 @@ body {
     const activeBtn = document.getElementById('btn-' + lang);
     if(activeBtn) activeBtn.classList.add('active');
     
-    // පෙළ (Text) මාරු කිරීම - මෙහිදී ID එකක් ඇත්දැයි පරීක්ෂා කර පසුව අගය මාරු කරයි
+    // පෙළ (Text) මාරු කිරීම
     const updateText = (id, text) => {
         const el = document.getElementById(id);
         if (el) el.innerText = text;
     };
 
+    // මෙහිදී 'txt-subtitle' පේළිය ඉවත් කර ඇති නිසා දැන් Error එකක් එන්නේ නැත
     updateText('txt-install-msg', langData[lang].install);
     updateText('btn-install', langData[lang].installBtn);
     updateText('lbl-phone', langData[lang].label);
@@ -272,6 +259,8 @@ body {
     updateText('btn-sms-txt', langData[lang].sms);
     updateText('txt-footer', langData[lang].footer);
 }
+
+// ඉතිරි functions (saveContact, sendAction ආදිය) මෙතැන් සිට පහළට ලියන්න...
 
         // --- Haptic Feedback ---
         document.addEventListener('click', function(e) {
