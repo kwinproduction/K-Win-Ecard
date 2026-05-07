@@ -249,6 +249,29 @@ body {
             document.getElementById('btn-sms-txt').innerText = langData[lang].sms;
             document.getElementById('txt-footer').innerText = langData[lang].footer;
         }
+        function setLang(lang) {
+    currentLang = lang;
+    
+    // Active Button එක මාරු කිරීම
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById('btn-' + lang);
+    if(activeBtn) activeBtn.classList.add('active');
+    
+    // පෙළ (Text) මාරු කිරීම - මෙහිදී ID එකක් ඇත්දැයි පරීක්ෂා කර පසුව අගය මාරු කරයි
+    const updateText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+    };
+
+    updateText('txt-install-msg', langData[lang].install);
+    updateText('btn-install', langData[lang].installBtn);
+    updateText('lbl-phone', langData[lang].label);
+    updateText('lbl-name', langData[lang].nameLabel);
+    updateText('btn-save-txt', langData[lang].save);
+    updateText('btn-wa-txt', langData[lang].wa);
+    updateText('btn-sms-txt', langData[lang].sms);
+    updateText('txt-footer', langData[lang].footer);
+}
 
         // --- Haptic Feedback ---
         document.addEventListener('click', function(e) {
