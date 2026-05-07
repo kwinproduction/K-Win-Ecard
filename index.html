@@ -310,20 +310,30 @@ body {
             }
         }
 
-        // --- Core Actions ---
-        function saveContact() {
-            const num = document.getElementById('phone').value.trim();
-            const uName = document.getElementById('u-name').value.trim();
-            if (num.length < 10) return alert(langData[currentLang].alert);
-            const finalName = uName || langData[currentLang].vcardName;
-            const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${finalName}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
-            const blob = new Blob([vcard], { type: "text/vcard" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `KWin_${num}.vcf`;
-            a.click();
-        }
+ // --- Core Actions ---
+function saveContact() {
+    const num = document.getElementById('phone').value.trim();
+    let uName = document.getElementById('u-name').value.trim(); // const වෙනුවට let පාවිච්චි කරන්න අගය වෙනස් කරන නිසා
+
+    if (num.length < 10) return alert(langData[currentLang].alert);
+
+    // නමක් ඇතුළත් කර ඇත්නම් එයට "K-Win client" එකතු කරයි, නැත්නම් default නම ගනී
+    let finalName;
+    if (uName) {
+        // දැනටමත් "K-Win client" කියලා තිබේ නම් නැවත එකතු නොකරයි
+        finalName = uName.includes("K-Win client") ? uName : `${uName} K-Win client`;
+    } else {
+        finalName = langData[currentLang].vcardName;
+    }
+
+    const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${finalName}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
+    const blob = new Blob([vcard], { type: "text/vcard" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `KWin_${num}.vcf`;
+    a.click();
+}
 
         function sendAction(type) {
             let num = document.getElementById('phone').value.trim();
@@ -352,6 +362,19 @@ body {
                 // Android වලදී beforeinstallprompt event එක හරහා පෙන්වනු ඇත
             }
         };
+        <script>
+    const nameInput = document.getElementById('u-name');
+
+    nameInput.addEventListener('blur', function() {
+        // දැනට පවතින අගය ලබා ගැනීම
+        let currentName = this.value.trim();
+
+        // නමක් ඇතුළත් කර ඇත්නම් සහ දැනටමත් "K-Win client" එකතු කර නැත්නම් පමණක් මෙය ක්‍රියාත්මක වේ
+        if (currentName !== "" && !currentName.includes("K-Win client")) {
+            this.value = currentName + " K-Win client";
+        }
+    });
+</script>
     </script>
 </body>
 </html>
