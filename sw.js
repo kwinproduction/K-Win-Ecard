@@ -61,3 +61,20 @@ self.addEventListener('fetch', (e) => {
   // App එක offline වැඩ කිරීමට අවශ්‍ය මූලික සැකසුම
   e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });
+// 5. ගොනු ලබාදීම (Fetch Event)
+self.addEventListener('fetch', (event) => {
+  // Supabase API requests හඳුනාගෙන ඒවා Cache කිරීමෙන් වැළකීම
+  if (event.request.url.includes('supabase.co')) {
+    event.respondWith(fetch(event.request));
+    return; // මෙතනින් ඉවත් වේ
+  }
+
+  // අනෙකුත් සාමාන්‍ය Assets (HTML, CSS, Images) සඳහා කලින් ලියපු Cache ක්‍රමයම ක්‍රියාත්මක වේ
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    }).catch(() => {
+      return caches.match('./index.html');
+    })
+  );
+});
