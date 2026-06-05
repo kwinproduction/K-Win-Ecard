@@ -592,7 +592,7 @@
         return;
       }
 
-      const { data, error } = await supabaseClient
+      const { error } = await supabaseClient
         .from('notifications')
         .insert([
           {
@@ -607,37 +607,6 @@
         console.error(error);
         alert(error.message || 'Failed');
         return;
-      }
-
-      if ('Notification' in window && Notification.permission !== 'granted') {
-        try {
-          await Notification.requestPermission();
-        } catch (err) {
-          console.log(err);
-        }
-      }
-
-      if ('Notification' in window && Notification.permission === 'granted') {
-        navigator.serviceWorker.getRegistration().then((reg) => {
-          if (reg) {
-            reg.showNotification('K-Win Notification', {
-              body: message,
-              icon: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
-              badge: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
-              vibrate: [300, 100, 300],
-              tag: 'kwin',
-              renotify: true,
-              requireInteraction: true
-            });
-          }
-        });
-      }
-
-      try {
-        const audio = new Audio('https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3');
-        await audio.play();
-      } catch (e) {
-        console.log('Audio play blocked');
       }
 
       alert('Notification Sent');
