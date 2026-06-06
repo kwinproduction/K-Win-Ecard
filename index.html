@@ -440,6 +440,13 @@
     let deferredPrompt = null;
     let supabaseClient = null;
 
+    const SUPABASE_URL = 'https://qfwqfcwakstwovccogtx.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_-_GXUDxjyzXvjLYqE4hfAA_FDgdNIxm';
+
+    // Optional: create a Supabase Edge Function and place its URL here.
+    // This function should take the saved notification and send it to OneSignal.
+    const SEND_NOTIFICATION_FUNCTION_URL = 'https://qfwqfcwakstwovccogtx.supabase.co/functions/v1/send-notification';
+
     function setLang(lang) {
       currentLang = lang;
 
@@ -546,7 +553,9 @@
       const a = document.createElement('a');
       a.href = url;
       a.download = `KWin_${num}.vcf`;
+      document.body.appendChild(a);
       a.click();
+      a.remove();
       URL.revokeObjectURL(url);
     }
 
@@ -580,7 +589,7 @@
       const name = document.getElementById('u-name').value.trim();
       const message = document.getElementById('notify-message').value.trim();
 
-      if (message === '') {
+      if (!message) {
         alert('Enter message');
         return;
       }
@@ -592,21 +601,40 @@
         return;
       }
 
-      const { error } = await supabaseClient
-        .from('notifications')
-        .insert([
-          {
-            phone: phone,
-            name: name,
-            message: message,
-            created_at: new Date().toISOString()
-          }
-        ]);
+      const payload = {
+        phone,
+        name,
+        message,
+        created_at: new Date().toISOString()
+      };
 
-      if (error) {
-        console.error(error);
-        alert(error.message || 'Failed');
+      const { error: insertError } = await supabaseClient
+        .from('notifications')
+        .insert([payload]);
+
+      if (insertError) {
+        console.error('Supabase insert error:', insertError);
+        alert(insertError.message || 'Failed to save notification');
         return;
+      }
+
+      try {
+        if (SEND_NOTIFICATION_FUNCTION_URL && !SEND_NOTIFICATION_FUNCTION_URL.includes('YOUR_')) {
+          const res = await fetch(SEND_NOTIFICATION_FUNCTION_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            console.warn('Edge Function response not ok:', text);
+          }
+        }
+      } catch (err) {
+        console.warn('Edge Function call failed:', err);
       }
 
       alert('Notification Sent');
@@ -631,9 +659,6 @@
           this.value = currentName + ' K-Win client';
         }
       });
-
-      const SUPABASE_URL = 'https://qfwqfcwakstwovccogtx.supabase.co';
-      const SUPABASE_KEY = 'sb_publishable_-_GXUDxjyzXvjLYqE4hfAA_FDgdNIxm';
 
       if (window.supabase && typeof window.supabase.createClient === 'function') {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
