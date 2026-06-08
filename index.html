@@ -510,58 +510,49 @@
         function closePopup() {
             popup.style.display = "none";
         }
-        // --- Send Notification ---
-        async function sendNotification() {
-            const title = document.getElementById("title").value.trim();
-            const message = document.getElementById("message").value.trim();
-            if (!message) {
-                alert(currentLang === 'si' ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න" : (currentLang === 'ta' ? "செய்தியை உள்ளிடவும்" : "Enter a message"));
-                return;
-            }
-            try {
-                // Correct OneSignal Endpoint and REST API Auth header format
-                const response = await fetch(
-                    "https://onesignal.com/api/v1/notifications",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json; charset=utf-8",
-                            "Authorization": `"idu3ph2svuhunc2xxylhgsddz",
-                        },
-                        body: JSON.stringify({
-                            app_id: "ebdc2cd4-a21d-434f-ab63-d60f21ad3295",
-                            included_segments: ["Subscribed Users"],
-                            headings: {
-                                en: title || "Notification"
-                            },
-                            contents: {
-                                en: message
-                            }
-                        })
-                    }
-                );
-                if (!response.ok) {
-                    const errResult = await response.json().catch(() => ({}));
-                    throw new Error(errResult.errors ? errResult.errors.join(", ") : `HTTP status ${response.status}`);
-                }
-                const result = await response.json();
-                console.log(result);
-                alert(currentLang === 'si' ? "දැනුම්දීම සාර්ථකව යවන ලදී!" : (currentLang === 'ta' ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!" : "Notification Sent Successfully"));
-                document.getElementById("title").value = "";
-                document.getElementById("message").value = "";
-                closePopup();
-            } catch (error) {
-                console.error("Error sending notification:", error);
-                
-                let errMsg = error.message;
-                // Handle browser CORS blocking errors explicitly so user knows what's wrong
-                if (error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
-                    errMsg = "\n\n⚠️ CORS Blocked: Browsers block direct OneSignal REST API calls from client-side code for security (to prevent REST API key exposure). You must call this API from a backend server.";
-                }
-                
-                alert("Failed to send notification: " + errMsg);
-            }
+        // --- Send Notification (Updated for Vercel Backend) ---
+async function sendNotification() {
+    const title = document.getElementById("title").value.trim();
+    const message = document.getElementById("message").value.trim();
+    
+    if (!message) {
+        alert(currentLang === 'si' ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න" : (currentLang === 'ta' ? "செய்தியை உள்ளிடவும்" : "Enter a message"));
+        return;
+    }
+    
+    try {
+        // කෙලින්ම OneSignal එකට කෝල් කරන්නේ නැතුව ඔයා හදපු Vercel API එකට කෝල් එක යවනවා
+        const response = await fetch("/api/send-notification", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                title: title,
+                message: message
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.error || `HTTP status ${response.status}`);
         }
+        
+        console.log("Success:", result);
+        alert(currentLang === 'si' ? "දැනුම්දීම සාර්ථකව යවන ලදී!" : (currentLang === 'ta' ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!" : "Notification Sent Successfully"));
+        
+        // Input fields ටික Clear කිරීම
+        document.getElementById("title").value = "";
+        document.getElementById("message").value = "";
+        closePopup();
+        
+    } catch (error) {
+        console.error("Error sending notification:", error);
+        // Backend එක හරහා යන නිසා දැන් බ්‍රවුසර් එකෙන් CORS බ්ලොක් කරන්නේ නැහැ
+        alert("Failed to send notification: " + error.message);
+    }
+}
     </script>
 </body>
 </html>
