@@ -510,46 +510,59 @@
         function closePopup() {
             popup.style.display = "none";
         }
-        // --- Send Notification (Updated for Vercel Backend) ---
+      // --- Send Notification (Direct to OneSignal - No Vercel Needed) ---
 async function sendNotification() {
     const title = document.getElementById("title").value.trim();
     const message = document.getElementById("message").value.trim();
     
+    // මැසේජ් එකක් ඇතුලත් කරලා නැත්නම් Alert එකක් පෙන්වීම
     if (!message) {
         alert(currentLang === 'si' ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න" : (currentLang === 'ta' ? "செய்தியை உள்ளிடவும்" : "Enter a message"));
         return;
     }
     
+    // ඔයාගේ OneSignal තොරතුරු (කෙලින්ම කෝඩ් එක ඇතුලේ)
+    const appId = "ebdc2cd4-a21d-434f-ab63-d60f21ad3295";
+    const restApiKey = "idu3ph2svuhunc2xxylhgsddz"; 
+    
     try {
-        // කෙලින්ම OneSignal එකට කෝල් කරන්නේ නැතුව ඔයා හදපු Vercel API එකට කෝල් එක යවනවා
-        const response = await fetch("/api/send-notification", {
+        // කෙලින්ම OneSignal API එකටම Request එක යවනවා
+        const response = await fetch("https://onesignal.com/api/v1/notifications", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json; charset=utf-8",
+                "Authorization": `Basic ${idu3ph2svuhunc2xxylhgsddz}`
             },
             body: JSON.stringify({
-                title: title,
-                message: message
+                app_id: "ebdc2cd4-a21d-434f-ab63-d60f21ad3295",
+                included_segments: ["Subscribed Users"], // ඇප් එකේ ඉන්න හැමෝටම මැසේජ් එක යන්න
+                headings: {
+                    en: title || "K-Win Alert" // ටයිටල් එකක් ලීවේ නැත්නම් ඩිෆෝල්ට් මේක වැටෙනවා
+                },
+                contents: {
+                    en: message
+                }
             })
         });
         
         const result = await response.json();
         
         if (!response.ok) {
-            throw new Error(result.error || `HTTP status ${response.status}`);
+            throw new Error(result.errors ? result.errors[0] : `HTTP status ${response.status}`);
         }
         
         console.log("Success:", result);
+        
+        // සාර්ථකයි නම් භාෂාව අනුව Alert එකක් පෙන්වීම
         alert(currentLang === 'si' ? "දැනුම්දීම සාර්ථකව යවන ලදී!" : (currentLang === 'ta' ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!" : "Notification Sent Successfully"));
         
-        // Input fields ටික Clear කිරීම
+        // Input fields ටික Clear කර Popup එක Close කිරීම
         document.getElementById("title").value = "";
         document.getElementById("message").value = "";
         closePopup();
         
     } catch (error) {
         console.error("Error sending notification:", error);
-        // Backend එක හරහා යන නිසා දැන් බ්‍රවුසර් එකෙන් CORS බ්ලොක් කරන්නේ නැහැ
         alert("Failed to send notification: " + error.message);
     }
 }
