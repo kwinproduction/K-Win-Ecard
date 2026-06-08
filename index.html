@@ -510,7 +510,7 @@
         function closePopup() {
             popup.style.display = "none";
         }
-      // --- Send Notification (Direct to OneSignal - No Vercel Needed) ---
+// --- Send Notification (Direct to OneSignal - No Vercel Needed) ---
 async function sendNotification() {
     const title = document.getElementById("title").value.trim();
     const message = document.getElementById("message").value.trim();
@@ -521,7 +521,7 @@ async function sendNotification() {
         return;
     }
     
-    // ඔයාගේ OneSignal තොරතුරු (කෙලින්ම කෝඩ් එක ඇතුලේ)
+    // ඔයාගේ OneSignal තොරතුරු
     const appId = "ebdc2cd4-a21d-434f-ab63-d60f21ad3295";
     const restApiKey = "idu3ph2svuhunc2xxylhgsddz"; 
     
@@ -531,10 +531,10 @@ async function sendNotification() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json; charset=utf-8",
-                "Authorization": `Basic ${idu3ph2svuhunc2xxylhgsddz}`
+                "Authorization": `Basic ${restApiKey}` // <-- මෙන්න මෙතන Variable එකේ නම නිවැරදි කරා
             },
             body: JSON.stringify({
-                app_id: "ebdc2cd4-a21d-434f-ab63-d60f21ad3295",
+                app_id: appId,
                 included_segments: ["Subscribed Users"], // ඇප් එකේ ඉන්න හැමෝටම මැසේජ් එක යන්න
                 headings: {
                     en: title || "K-Win Alert" // ටයිටල් එකක් ලීවේ නැත්නම් ඩිෆෝල්ට් මේක වැටෙනවා
