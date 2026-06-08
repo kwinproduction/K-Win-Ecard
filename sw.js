@@ -2,35 +2,34 @@
 const CACHE_VERSION = 'v2.28'; 
 const CACHE_NAME = `kwin-cache-${CACHE_VERSION}`;
 
-// 2. Cache කළ යුතු ගොනු ලැයිස්තුව
+// 2. Cache කළ යුතු ගොනු ලැයිස්තුව (Assets)
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  
   'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg'
 ];
 
-// 3. Service Worker එක Install වීම
+// 3. Service Worker එක Install වීම සහ Assets Cache කිරීම
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
+  console.log('K-Win Service Worker: Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Service Worker: Caching Assets');
+      console.log('K-Win Service Worker: Caching Assets');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting(); 
+  self.skipWaiting(); // අලුත් Version එක ඉක්මනින් Active කිරීමට
 });
 
 // 4. පරණ Cache Auto-Delete කිරීම (Activate Event)
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activated');
+  console.log('K-Win Service Worker: Activated');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('Service Worker: Deleting Old Cache...', cache);
+            console.log('K-Win Service Worker: Deleting Old Cache...', cache);
             return caches.delete(cache);
           }
         })
@@ -42,38 +41,20 @@ self.addEventListener('activate', (event) => {
 
 // 5. ගොනු ලබාදීම (Fetch Event)
 self.addEventListener('fetch', (event) => {
+  
+  // 💡 Supabase API හෝ බාහිර API requests හඳුනාගෙන ඒවා Cache කිරීමෙන් වැළකීම (Live Data සඳහා)
+  if (event.request.url.includes('supabase.co') || event.request.url.includes('onesignal.com')) {
+    event.respondWith(fetch(event.request));
+    return; 
+  }
+
+  // සාමාන්‍ය Assets (HTML, CSS, Images) සඳහා Cache ක්‍රමය
   event.respondWith(
     caches.match(event.request).then((response) => {
       // Cache එකේ ඇත්නම් එය ලබා දෙයි, නැත්නම් Network එකෙන් ලබා ගනී
       return response || fetch(event.request);
     }).catch(() => {
-        // Network එකත් නැත්නම් (Offline නම්) index.html එක පෙන්නන්න පුළුවන්
-        return caches.match('./index.html');
-    })
-  );
-});
-// sw.js
-self.addEventListener('install', (e) => {
-  console.log('K-Win Service Worker Installed');
-});
-
-self.addEventListener('fetch', (e) => {
-  // App එක offline වැඩ කිරීමට අවශ්‍ය මූලික සැකසුම
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-});
-// 5. ගොනු ලබාදීම (Fetch Event)
-self.addEventListener('fetch', (event) => {
-  // Supabase API requests හඳුනාගෙන ඒවා Cache කිරීමෙන් වැළකීම
-  if (event.request.url.includes('supabase.co')) {
-    event.respondWith(fetch(event.request));
-    return; // මෙතනින් ඉවත් වේ
-  }
-
-  // අනෙකුත් සාමාන්‍ය Assets (HTML, CSS, Images) සඳහා කලින් ලියපු Cache ක්‍රමයම ක්‍රියාත්මක වේ
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    }).catch(() => {
+      // Network එකත් නැත්නම් (Offline නම්) index.html එක පෙන්වයි
       return caches.match('./index.html');
     })
   );
