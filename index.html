@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>K-Win</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiS1dpbiIsInNob3J0X25hbWUiOiJLLVdpbiIsInN0YXJ0X3VybCI6ImluZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMDAwMDAwIiwidGhlbWVfY29sb3IiOiIjZmZmZmZmIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20va3dpbnByb2R1Y3Rpb24vSy1XaW4tRWNhcmQvbWFpbi9sb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
   <link rel="icon" type="image/jpeg" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
   <meta name="theme-color" content="#000000">
@@ -357,6 +359,22 @@
       background: #dc3545;
       color: white;
     }
+
+    #incomingToast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111;
+      color: #fff;
+      border: 1px solid #2b2b2b;
+      padding: 14px 16px;
+      border-radius: 16px;
+      z-index: 999999;
+      width: min(92vw, 380px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+    }
   </style>
 </head>
 <body>
@@ -434,219 +452,212 @@
 
   <div class="footer" id="txt-footer">Powered by K-Win | Design by Janith Didula</div>
 
- <script>
-  let currentLang = 'en';
-  let deferredPrompt = null;
+  <script>
+    const SUPABASE_URL = "https://qfwqfcwakstwovccogtx.supabase.co";
+    const SUPABASE_ANON_KEY = "PASTE_YOUR_REAL_ANON_KEY_HERE";
 
-  const langData = {
-    en: {
-      install: "📲 Install K-Win App",
-      installBtn: "INSTALL",
-      label: "ENTER MOBILE NUMBER",
-      nameLabel: "ENTER NAME",
-      save: "👤 Save to Contacts",
-      wa: "💬 Send WhatsApp",
-      sms: "✉️ Send SMS",
-      alert: "Please enter a valid number",
-      vcardName: "K-Win Client",
-      smsMsg: "Get your K-Win Digital Card here:",
-      footer: "Powered by K-Win | Design by Janith Didula",
-      notify: "🔔 Send Notification",
-      notifyTitle: "Send Notification",
-      notifyMessage: "Type your message...",
-      titlePlaceholder: "Notification Title",
-      send: "Send",
-      close: "Close"
-    },
-    si: {
-      install: "📲 Shortcut එකක් සාදාගන්න",
-      installBtn: "INSTALL",
-      label: "දුරකථන අංකය ඇතුළත් කරන්න",
-      nameLabel: "නම ඇතුළත් කරන්න",
-      save: "👤 සම්බන්ධතාවලට එක් කරන්න",
-      wa: "💬 WhatsApp පණිවිඩයක් යවන්න",
-      sms: "✉️ SMS එකක් යවන්න",
-      alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න",
-      vcardName: "K-Win සේවාලාභියා",
-      smsMsg: "ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න:",
-      footer: "K-Win වෙතින් | ජනිත් දිදුලගේ නිර්මාණයකි",
-      notify: "🔔 දැනුම්දීමක් යවන්න",
-      notifyTitle: "දැනුම්දීමක් යවන්න",
-      notifyMessage: "ඔබගේ පණිවිඩය ලියන්න...",
-      titlePlaceholder: "දැනුම්දීමේ මාතෘකාව",
-      send: "යවන්න",
-      close: "වසන්න"
-    },
-    ta: {
-      install: "📲 குறுக்குவழியை உருவாக்கவும்",
-      installBtn: "நிறுவவும்",
-      label: "கைபேசி எண்ணை உள்ளிடவும்",
-      nameLabel: "பெயரை உள்ளிடவும்",
-      save: "👤 தொடர்புகளில் சேமிக்கவும்",
-      wa: "💬 WhatsApp அனுப்பவும்",
-      sms: "✉️ SMS அனுப்பவும்",
-      alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்",
-      vcardName: "K-Win கிளையண்ட்",
-      smsMsg: "உங்கள் K-Win டிஜிட்டல் கார்டை இங்கே பெறுங்கள்:",
-      footer: "K-Win மூலம் இயக்கப்படுகிறது | வடிவமைப்பு: ஜனித் திதுல",
-      notify: "🔔 அறிவிப்பை அனுப்பு",
-      notifyTitle: "அறிவிப்பை அனுப்பு",
-      notifyMessage: "உங்கள் செய்தியை எழுதுங்கள்...",
-      titlePlaceholder: "அறிவிப்பு தலைப்பு",
-      send: "அனுப்பு",
-      close: "மூடு"
-    }
-  };
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  function setLang(lang) {
-    currentLang = lang;
-    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById('btn-' + lang);
-    if (activeBtn) activeBtn.classList.add('active');
+    let currentLang = 'en';
+    let deferredPrompt = null;
 
-    const updateText = (id, text) => {
-      const el = document.getElementById(id);
-      if (el) el.innerText = text;
-    };
-
-    updateText('txt-install-msg', langData[lang].install);
-    updateText('btn-install', langData[lang].installBtn);
-    updateText('lbl-phone', langData[lang].label);
-    updateText('lbl-name', langData[lang].nameLabel);
-    updateText('btn-save-txt', langData[lang].save);
-    updateText('btn-wa-txt', langData[lang].wa);
-    updateText('btn-sms-txt', langData[lang].sms);
-    updateText('txt-footer', langData[lang].footer);
-    updateText('btn-notify-txt', langData[lang].notify);
-    updateText('popup-title', langData[lang].notifyTitle);
-    updateText('send-btn-txt', langData[lang].send);
-    updateText('close-btn-txt', langData[lang].close);
-
-    const titleInput = document.getElementById('title');
-    if (titleInput) titleInput.placeholder = langData[lang].titlePlaceholder;
-
-    const messageInput = document.getElementById('message');
-    if (messageInput) messageInput.placeholder = langData[lang].notifyMessage;
-  }
-
-  function closePopup() {
-    document.getElementById("popup").style.display = "none";
-  }
-
-  function showIncomingToast(title, message) {
-    let box = document.getElementById("incomingToast");
-
-    if (!box) {
-      box = document.createElement("div");
-      box.id = "incomingToast";
-      box.style = `
-        position: fixed;
-        top: 16px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #111;
-        color: #fff;
-        border: 1px solid #2b2b2b;
-        padding: 14px 16px;
-        border-radius: 16px;
-        z-index: 999999;
-        width: min(92vw, 380px);
-        box-shadow: 0 10px 30px rgba(0,0,0,.35);
-        backdrop-filter: blur(8px);
-      `;
-      document.body.appendChild(box);
-    }
-
-    box.innerHTML = `
-      <div style="font-weight:800; margin-bottom:6px; color:#00f2ff;">${title || "K-Win Notification"}</div>
-      <div style="font-size:14px; line-height:1.5;">${message || ""}</div>
-    `;
-
-    setTimeout(() => {
-      if (box) box.remove();
-    }, 4500);
-  }
-
-  function showBrowserNotification(title, message) {
-    if (!("Notification" in window)) return;
-    if (Notification.permission !== "granted") return;
-
-    const n = new Notification(title || "K-Win Notification", {
-      body: message || "",
-      icon: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
-      badge: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg"
-    });
-
-    n.onclick = () => {
-      window.focus();
-      n.close();
-    };
-  }
-
- async function sendNotification() {
-  const title = document.getElementById("title").value.trim();
-  const message = document.getElementById("message").value.trim();
-
-  if (!message) {
-    alert("Enter a message");
-    return;
-  }
-
-  const SUPABASE_URL = "https://qfwqfcwakstwovccogtx.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA"; // 🔴 මෙතනට Dashboard එකෙන් ගන්න
-
-  try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "Prefer": "return=representation"
+    const langData = {
+      en: {
+        install: "📲 Install K-Win App",
+        installBtn: "INSTALL",
+        label: "ENTER MOBILE NUMBER",
+        nameLabel: "ENTER NAME",
+        save: "👤 Save to Contacts",
+        wa: "💬 Send WhatsApp",
+        sms: "✉️ Send SMS",
+        alert: "Please enter a valid number",
+        vcardName: "K-Win Client",
+        smsMsg: "Get your K-Win Digital Card here:",
+        footer: "Powered by K-Win | Design by Janith Didula",
+        notify: "🔔 Send Notification",
+        notifyTitle: "Send Notification",
+        notifyMessage: "Type your message...",
+        titlePlaceholder: "Notification Title",
+        send: "Send",
+        close: "Close"
       },
-      body: JSON.stringify({
-        title: title || "K-Win Notification",
-        message: message,
-        created_at: new Date().toISOString()
-      })
-    });
+      si: {
+        install: "📲 Shortcut එකක් සාදාගන්න",
+        installBtn: "INSTALL",
+        label: "දුරකථන අංකය ඇතුළත් කරන්න",
+        nameLabel: "නම ඇතුළත් කරන්න",
+        save: "👤 සම්බන්ධතාවලට එක් කරන්න",
+        wa: "💬 WhatsApp පණිවිඩයක් යවන්න",
+        sms: "✉️ SMS එකක් යවන්න",
+        alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න",
+        vcardName: "K-Win Client",
+        smsMsg: "ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න:",
+        footer: "K-Win වෙතින් | ජනිත් දිදුලගේ නිර්මාණයකි",
+        notify: "🔔 දැනුම්දීමක් යවන්න",
+        notifyTitle: "දැනුම්දීමක් යවන්න",
+        notifyMessage: "ඔබගේ පණිවිඩය ලියන්න...",
+        titlePlaceholder: "දැනුම්දීමේ මාතෘකාව",
+        send: "යවන්න",
+        close: "වසන්න"
+      },
+      ta: {
+        install: "📲 குறுக்குவழியை உருவாக்கவும்",
+        installBtn: "நிறுவவும்",
+        label: "கைபேசி எண்ணை உள்ளிடவும்",
+        nameLabel: "பெயரை உள்ளிடவும்",
+        save: "👤 தொடர்புகளில் சேமிக்கவும்",
+        wa: "💬 WhatsApp அனுப்பவும்",
+        sms: "✉️ SMS அனுப்பவும்",
+        alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்",
+        vcardName: "K-Win Client",
+        smsMsg: "உங்கள் K-Win டிஜிட்டல் கார்டை இங்கே பெறுங்கள்:",
+        footer: "K-Win மூலம் இயக்கப்படுகிறது | வடிவமைப்பு: ஜனித் திதுல",
+        notify: "🔔 அறிவிப்பை அனுப்பு",
+        notifyTitle: "அறிவிப்பை அனுப்பு",
+        notifyMessage: "உங்கள் செய்தியை எழுதுங்கள்...",
+        titlePlaceholder: "அறிவிப்பு தலைப்பு",
+        send: "அனுப்பு",
+        close: "மூடு"
+      }
+    };
 
-    const data = await response.json();
+    function setLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-' + lang);
+      if (activeBtn) activeBtn.classList.add('active');
 
-    if (!response.ok) {
-      throw new Error(JSON.stringify(data));
+      const updateText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+      };
+
+      updateText('txt-install-msg', langData[lang].install);
+      updateText('btn-install', langData[lang].installBtn);
+      updateText('lbl-phone', langData[lang].label);
+      updateText('lbl-name', langData[lang].nameLabel);
+      updateText('btn-save-txt', langData[lang].save);
+      updateText('btn-wa-txt', langData[lang].wa);
+      updateText('btn-sms-txt', langData[lang].sms);
+      updateText('txt-footer', langData[lang].footer);
+      updateText('btn-notify-txt', langData[lang].notify);
+      updateText('popup-title', langData[lang].notifyTitle);
+      updateText('send-btn-txt', langData[lang].send);
+      updateText('close-btn-txt', langData[lang].close);
+
+      const titleInput = document.getElementById('title');
+      if (titleInput) titleInput.placeholder = langData[lang].titlePlaceholder;
+
+      const messageInput = document.getElementById('message');
+      if (messageInput) messageInput.placeholder = langData[lang].notifyMessage;
     }
 
-    alert("Notification Sent Successfully!");
-    closePopup();
-
-  } catch (err) {
-    console.error(err);
-    alert("Failed: " + err.message);
-  }
-}
-      alert(
-        currentLang === "si"
-          ? "දැනුම්දීම සාර්ථකව යවන ලදී!"
-          : currentLang === "ta"
-          ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!"
-          : "Notification Sent Successfully!"
-      );
-
-      document.getElementById("title").value = "";
-      document.getElementById("message").value = "";
-      closePopup();
-
-      // Sender page එකේත් realtime listener එකෙන් message එක එනවා.
-    } catch (error) {
-      console.error("Notification Error:", error);
-      alert("Failed to send notification: " + error.message);
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
     }
-  }
 
-  async function startRealtimeListener() {
-    try {
-      const channel = supabaseClient
+    function showIncomingToast(title, message) {
+      let box = document.getElementById("incomingToast");
+
+      if (!box) {
+        box = document.createElement("div");
+        box.id = "incomingToast";
+        document.body.appendChild(box);
+      }
+
+      box.innerHTML = `
+        <div style="font-weight:800; margin-bottom:6px; color:#00f2ff;">${title || "K-Win Notification"}</div>
+        <div style="font-size:14px; line-height:1.5;">${message || ""}</div>
+      `;
+
+      setTimeout(() => {
+        if (box) box.remove();
+      }, 4500);
+    }
+
+    function showBrowserNotification(title, message) {
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
+
+      const n = new Notification(title || "K-Win Notification", {
+        body: message || "",
+        icon: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
+        badge: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg"
+      });
+
+      n.onclick = () => {
+        window.focus();
+        n.close();
+      };
+    }
+
+    async function askNotificationPermission() {
+      if (!("Notification" in window)) return;
+
+      if (Notification.permission === "default") {
+        try {
+          await Notification.requestPermission();
+        } catch (e) {}
+      }
+    }
+
+    async function sendNotification() {
+      const title = document.getElementById("title").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      if (!message) {
+        alert(
+          currentLang === "si"
+            ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න"
+            : currentLang === "ta"
+            ? "செய்தியை உள்ளிடவும்"
+            : "Enter a message"
+        );
+        return;
+      }
+
+      try {
+        const response = await fetch(`${https://nuzfxdozbjiqxwjwhwxg.supabase.co}/rest/v1/notifications`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA",
+            "Authorization": `Bearer ${eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA}`,
+            "Prefer": "return=representation"
+          },
+          body: JSON.stringify({
+            title: title || "K-Win Notification",
+            message: message,
+            created_at: new Date().toISOString()
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(JSON.stringify(data));
+        }
+
+        alert(
+          currentLang === "si"
+            ? "දැනුම්දීම සාර්ථකව යවන ලදී!"
+            : currentLang === "ta"
+            ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!"
+            : "Notification Sent Successfully!"
+        );
+
+        document.getElementById("title").value = "";
+        document.getElementById("message").value = "";
+        closePopup();
+
+      } catch (err) {
+        console.error("Notification Error:", err);
+        alert("Failed: " + err.message);
+      }
+    }
+
+    function startRealtimeListener() {
+      supabaseClient
         .channel("realtime-notifications")
         .on(
           "postgres_changes",
@@ -667,143 +678,141 @@
         .subscribe((status) => {
           console.log("Supabase status:", status);
         });
-
-      window.__kwinChannel = channel;
-    } catch (err) {
-      console.error("Realtime listener error:", err);
-    }
-  }
-
-  window.onload = async () => {
-    setLang('en');
-
-    const isStandalone =
-      window.navigator.standalone === true ||
-      window.matchMedia('(display-mode: standalone)').matches;
-
-    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-
-    if (!isStandalone && isIos) {
-      document.getElementById('install-banner').style.display = 'flex';
     }
 
-    await askNotificationPermission();
-    await startRealtimeListener();
-  };
+    function saveContact() {
+      const num = document.getElementById('phone').value.trim();
+      const uName = document.getElementById('u-name').value.trim();
 
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.btn') || e.target.closest('.notify-btn') || e.target.tagName === 'BUTTON') {
-      if (navigator.vibrate) navigator.vibrate(40);
+      if (num.length < 10) return alert(langData[currentLang].alert);
+
+      const clientText = "K-Win Client";
+      const finalName = uName
+        ? (uName.includes(clientText) ? uName : `${uName} - ${clientText}`)
+        : clientText;
+
+      const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:${finalName}
+TEL;TYPE=CELL:${num}
+END:VCARD`;
+
+      const blob = new Blob([vcard], { type: "text/vcard" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `KWin_${num}.vcf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-  });
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('install-banner').style.display = 'flex';
-  });
+    function sendAction(type) {
+      let num = document.getElementById('phone').value.trim();
+      if (num.length < 10) return alert(langData[currentLang].alert);
 
-  function handleInstallClick() {
-    const ua = window.navigator.userAgent.toLowerCase();
-    const isIos = /iphone|ipad|ipod/.test(ua);
+      if (num.startsWith('0')) num = '94' + num.substring(1);
 
-    if (isIos) {
-      const container = document.getElementById('ios-steps-container');
-      const isChromeIos = /crios/.test(ua);
-      let stepsHtml = '';
+      const link = "https://kwinproduction.github.io/K-Win-Card/";
+      const msg = `${langData[currentLang].smsMsg} ${link}`;
 
-      if (isChromeIos) {
-        stepsHtml = `
-          <p style="opacity: 0.9; margin-bottom: 15px;">Chrome හරහා Shortcut එකක් සාදාගන්න:</p>
-          <div class="instruction-step">1️⃣ ඉහළ දකුණු කෙළවරේ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
-          <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
-          <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
-        `;
+      if (type === 'wa') {
+        window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
       } else {
-        stepsHtml = `
-          <p style="opacity: 0.9; margin-bottom: 15px;">Safari හරහා Shortcut එකක් සාදාගන්න:</p>
-          <div class="instruction-step">1️⃣ පහළ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
-          <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
-          <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
-        `;
+        const sep = (/iphone|ipad|ipod/i).test(navigator.userAgent) ? '&' : '?';
+        window.location.href = `sms:+${num}${sep}body=${encodeURIComponent(msg)}`;
+      }
+    }
+
+    function handleInstallClick() {
+      const ua = window.navigator.userAgent.toLowerCase();
+      const isIos = /iphone|ipad|ipod/.test(ua);
+
+      if (isIos) {
+        const container = document.getElementById('ios-steps-container');
+        const isChromeIos = /crios/.test(ua);
+        let stepsHtml = '';
+
+        if (isChromeIos) {
+          stepsHtml = `
+            <p style="opacity: 0.9; margin-bottom: 15px;">Chrome හරහා Shortcut එකක් සාදාගන්න:</p>
+            <div class="instruction-step">1️⃣ ඉහළ දකුණු කෙළවරේ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
+            <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
+            <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
+          `;
+        } else {
+          stepsHtml = `
+            <p style="opacity: 0.9; margin-bottom: 15px;">Safari හරහා Shortcut එකක් සාදාගන්න:</p>
+            <div class="instruction-step">1️⃣ පහළ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
+            <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
+            <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
+          `;
+        }
+
+        container.innerHTML = stepsHtml;
+        document.getElementById('ios-instructions').style.display = 'flex';
+      } else if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choice) => {
+          if (choice.outcome === 'accepted') {
+            document.getElementById('install-banner').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        alert("Please use your browser's menu to 'Add to Home Screen'.");
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.btn') || e.target.closest('.notify-btn') || e.target.tagName === 'BUTTON') {
+        if (navigator.vibrate) navigator.vibrate(40);
+      }
+    });
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-banner').style.display = 'flex';
+    });
+
+    document.getElementById("openPopup").addEventListener("click", () => {
+      document.getElementById("popup").style.display = "flex";
+    });
+
+    document.getElementById('u-name').addEventListener('blur', function() {
+      let currentName = this.value.trim();
+      if (currentName !== "" && !currentName.includes("K-Win Client")) {
+        this.value = currentName + " - K-Win Client";
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      setLang('en');
+
+      const isStandalone =
+        window.navigator.standalone === true ||
+        window.matchMedia('(display-mode: standalone)').matches;
+
+      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+      if (!isStandalone && isIos) {
+        document.getElementById('install-banner').style.display = 'flex';
       }
 
-      container.innerHTML = stepsHtml;
-      document.getElementById('ios-instructions').style.display = 'flex';
-    } else if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choice) => {
-        if (choice.outcome === 'accepted') {
-          document.getElementById('install-banner').style.display = 'none';
-        }
-        deferredPrompt = null;
-      });
-    } else {
-      alert("Please use your browser's menu to 'Add to Home Screen'.");
-    }
-  }
-
-  function saveContact() {
-    const num = document.getElementById('phone').value.trim();
-    let uName = document.getElementById('u-name').value.trim();
-
-    if (num.length < 10) return alert(langData[currentLang].alert);
-
-    let finalName;
-    if (uName) {
-      finalName = uName.includes("K-Win client") ? uName : `${uName} K-Win client`;
-    } else {
-      finalName = langData[currentLang].vcardName;
-    }
-
-    const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${finalName}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
-    const blob = new Blob([vcard], { type: "text/vcard" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `KWin_${num}.vcf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  function sendAction(type) {
-    let num = document.getElementById('phone').value.trim();
-    if (num.length < 10) return alert(langData[currentLang].alert);
-
-    if (num.startsWith('0')) num = '94' + num.substring(1);
-
-    const link = "https://kwinproduction.github.io/K-Win-Card/";
-    const msg = `${langData[currentLang].smsMsg} ${link}`;
-
-    if (type === 'wa') {
-      window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
-    } else {
-      const sep = (/iphone|ipad|ipod/i).test(navigator.userAgent) ? '&' : '?';
-      window.location.href = `sms:+${num}${sep}body=${encodeURIComponent(msg)}`;
-    }
-  }
-
-  document.getElementById("openPopup").addEventListener("click", () => {
-    document.getElementById("popup").style.display = "flex";
-  });
-
-  document.getElementById('u-name').addEventListener('blur', function() {
-    let currentName = this.value.trim();
-    if (currentName !== "" && !currentName.includes("K-Win client")) {
-      this.value = currentName + " K-Win client";
-    }
-  });
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .catch(err => console.log('SW Fail', err));
+      await askNotificationPermission();
+      startRealtimeListener();
     });
-  }
-</script>
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .catch(err => console.log('SW Fail', err));
+      });
+    }
+  </script>
 </body>
 </html>
