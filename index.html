@@ -603,6 +603,12 @@
     document.getElementById("openPopup").addEventListener("click", () => {
       popup.style.display = "flex";
     });
+    if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .catch(err => console.log('SW Fail', err));
+  });
+}
   </script>
 </body>
 </html>
