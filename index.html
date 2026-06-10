@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>K-Win</title>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiS1dpbiIsInNob3J0X25hbWUiOiJLLVdpbiIsInN0YXJ0X3VybCI6ImluZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMDAwMDAwIiwidGhlbWVfY29sb3IiOiIjZmZmZmZmIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20va3dpbnByb2R1Y3Rpb24vSy1XaW4tRWNhcmQvbWFpbi9sb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
   <link rel="icon" type="image/jpeg" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
   <meta name="theme-color" content="#000000">
@@ -435,11 +435,6 @@
   <div class="footer" id="txt-footer">Powered by K-Win | Design by Janith Didula</div>
 
  <script>
-  const SUPABASE_URL = "https://qfwqfcwakstwovccogtx.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA";
-
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
   let currentLang = 'en';
   let deferredPrompt = null;
 
@@ -588,54 +583,48 @@
     };
   }
 
-  async function askNotificationPermission() {
-    if (!("Notification" in window)) return;
-    if (Notification.permission === "default") {
-      try {
-        await Notification.requestPermission();
-      } catch (e) {}
-    }
+ async function sendNotification() {
+  const title = document.getElementById("title").value.trim();
+  const message = document.getElementById("message").value.trim();
+
+  if (!message) {
+    alert("Enter a message");
+    return;
   }
 
-  async function sendNotification() {
-    const title = document.getElementById("title").value.trim();
-    const message = document.getElementById("message").value.trim();
+  const SUPABASE_URL = "https://qfwqfcwakstwovccogtx.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA"; // 🔴 මෙතනට Dashboard එකෙන් ගන්න
 
-    if (!message) {
-      alert(
-        currentLang === "si"
-          ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න"
-          : currentLang === "ta"
-          ? "செய்தியை உள்ளிடவும்"
-          : "Enter a message"
-      );
-      return;
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify({
+        title: title || "K-Win Notification",
+        message: message,
+        created_at: new Date().toISOString()
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(JSON.stringify(data));
     }
 
-    try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/notifications`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Prefer": "return=representation"
-          },
-          body: JSON.stringify({
-            title: title || "K-Win Notification",
-            message: message,
-            created_at: new Date().toISOString()
-          })
-        }
-      );
+    alert("Notification Sent Successfully!");
+    closePopup();
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
+  } catch (err) {
+    console.error(err);
+    alert("Failed: " + err.message);
+  }
+}
       alert(
         currentLang === "si"
           ? "දැනුම්දීම සාර්ථකව යවන ලදී!"
