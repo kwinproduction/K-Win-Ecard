@@ -411,10 +411,6 @@
 
     let currentLang = 'en';
     let deferredPrompt;
-
-    // මෙතන ඔයාගේ Supabase Edge Function URL දාන්න
-    const SUPABASE_FUNCTION_URL = "https://qfwqfcwakstwovccogtx.supabase.co/functions/v1/send-notification";
-
     function setLang(lang) {
       currentLang = lang;
       document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
@@ -550,7 +546,8 @@
       }
 
       try {
-        const res = await fetch(SUPABASE_FUNCTION_URL, {
+       // මෙතන ඔයාගේ Supabase Edge Function URL දාන්න
+    const SUPABASE_FUNCTION_URL = "https://qfwqfcwakstwovccogtx.supabase.co/functions/v1/send-notification";
           method: "POST",
           headers: {
             "Content-Type": "application/json"
