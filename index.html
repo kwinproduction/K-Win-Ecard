@@ -453,11 +453,10 @@
   <div class="footer" id="txt-footer">Powered by K-Win | Design by Janith Didula</div>
 
   <script>
-    // ඔබේ නිවැරදි Supabase තොරතුරු ඇතුළත් කරන්න
     const SUPABASE_URL = "https://nuzfxdozbjiqxwjwhwxg.supabase.co"; 
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA"; 
 
-   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentLang = 'en';
     let deferredPrompt = null;
@@ -576,25 +575,33 @@
       }, 4500);
     }
 
+    // වෙනස් කරන ලදි: සැබෑ System Push Notification එකක් ලෙස ක්‍රියාත්මක වීමට Service Worker භාවිතය
     function showBrowserNotification(title, message) {
       if (!("Notification" in window)) return;
       if (Notification.permission !== "granted") return;
 
-      const n = new Notification(title || "K-Win Notification", {
-        body: message || "",
-        icon: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
-        badge: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg"
-      });
-
-      n.onclick = () => {
-        window.focus();
-        n.close();
-      };
+      // App එක background එකේ ඇති විට පවා ක්‍රියා කිරීමට Service Worker එක හරහා පෙන්වීම
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification(title || "K-Win Notification", {
+            body: message || "",
+            icon: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
+            badge: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
+            vibrate: [200, 100, 200]
+          });
+        });
+      } else {
+        // Fallback: Service worker සක්‍රීය නැතිනම් සාමාන්‍ය ක්‍රමය
+        const n = new Notification(title || "K-Win Notification", {
+          body: message || "",
+          icon: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg"
+        });
+        n.onclick = () => { window.focus(); n.close(); };
+      }
     }
 
     async function askNotificationPermission() {
       if (!("Notification" in window)) return;
-
       if (Notification.permission === "default") {
         try {
           await Notification.requestPermission();
@@ -607,13 +614,7 @@
       const message = document.getElementById("message").value.trim();
 
       if (!message) {
-        alert(
-          currentLang === "si"
-            ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න"
-            : currentLang === "ta"
-            ? "செய்தியை உள்ளிடவும்"
-            : "Enter a message"
-        );
+        alert(currentLang === "si" ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න" : currentLang === "ta" ? "செய்தியை உள்ளிடவும்" : "Enter a message");
         return;
       }
 
@@ -634,19 +635,10 @@
         });
 
         const data = await response.json();
+        if (!response.ok) throw new Error(JSON.stringify(data));
 
-        if (!response.ok) {
-          throw new Error(JSON.stringify(data));
-        }
-
-        alert(
-          currentLang === "si"
-            ? "දැනුම්දීම සාර්ථකව යවන ලදී!"
-            : currentLang === "ta"
-            ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!"
-            : "Notification Sent Successfully!"
-        );
-
+        alert(currentLang === "si" ? "දැනුම්දීම සාර්ථකව යවන ලදී!" : currentLang === "ta" ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!" : "Notification Sent Successfully!");
+        
         document.getElementById("title").value = "";
         document.getElementById("message").value = "";
         closePopup();
@@ -662,16 +654,13 @@
         .channel("realtime-notifications")
         .on(
           "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "notifications"
-          },
+          { event: "INSERT", schema: "public", table: "notifications" },
           (payload) => {
             const row = payload.new || {};
             const title = row.title || "K-Win Notification";
             const message = row.message || "";
 
+            // ඇප් එක ඇතුලේ සහ ෆෝන් එකේ Notification Bar එකට එකවර යැවීම
             showIncomingToast(title, message);
             showBrowserNotification(title, message);
           }
@@ -688,16 +677,9 @@
       if (num.length < 10) return alert(langData[currentLang].alert);
 
       const clientText = "K-Win Client";
-      const finalName = uName
-        ? (uName.includes(clientText) ? uName : `${uName} - ${clientText}`)
-        : clientText;
+      const finalName = uName ? (uName.includes(clientText) ? uName : `${uName} - ${clientText}`) : clientText;
 
-      const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:${finalName}
-TEL;TYPE=CELL:${num}
-END:VCARD`;
-
+      const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${finalName}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
       const blob = new Blob([vcard], { type: "text/vcard" });
       const url = URL.createObjectURL(blob);
 
@@ -707,11 +689,9 @@ END:VCARD`;
       document.body.appendChild(a);
       a.click();
       a.remove();
-
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // වෙනස් කරන ලදි: මෙහි encodeURIComponent භාවිතයෙන් පණිවිඩය සකසා ඇත
     function sendAction(type) {
       let num = document.getElementById('phone').value.trim();
       if (num.length < 10) return alert(langData[currentLang].alert);
@@ -753,15 +733,12 @@ END:VCARD`;
             <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
           `;
         }
-
         container.innerHTML = stepsHtml;
         document.getElementById('ios-instructions').style.display = 'flex';
       } else if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choice) => {
-          if (choice.outcome === 'accepted') {
-            document.getElementById('install-banner').style.display = 'none';
-          }
+          if (choice.outcome === 'accepted') document.getElementById('install-banner').style.display = 'none';
           deferredPrompt = null;
         });
       } else {
@@ -794,11 +771,7 @@ END:VCARD`;
 
     window.addEventListener('DOMContentLoaded', async () => {
       setLang('en');
-
-      const isStandalone =
-        window.navigator.standalone === true ||
-        window.matchMedia('(display-mode: standalone)').matches;
-
+      const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
       const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
 
       if (!isStandalone && isIos) {
@@ -809,10 +782,12 @@ END:VCARD`;
       startRealtimeListener();
     });
 
+    // Service Worker ලියාපදිංචි කිරීම
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .catch(err => console.log('SW Fail', err));
+          .then(reg => console.log('Service Worker Registered Successfully', reg))
+          .catch(err => console.log('SW Registration Fail', err));
       });
     }
   </script>
