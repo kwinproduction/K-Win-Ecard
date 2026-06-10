@@ -75,3 +75,50 @@ self.addEventListener('fetch', (event) => {
     }).catch(() => caches.match('./index.html'))
   );
 });
+// සර්විස් වර්කර් එක ස්ථාපනය වීම
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+// App එක වසා තිබියදී හෝ Background එකේ ඇතිවිට ලැබෙන Notification පාලනය කිරීම
+self.addEventListener('push', (event) => {
+  let title = 'K-Win Notification';
+  let options = {
+    body: 'உங்களுக்கு ஒரு புதிய செய்தி உள்ளது / ඔබට නව පණිවිඩයක් ඇත.',
+    icon: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
+    badge: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
+    vibrate: [200, 100, 200]
+  };
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      title = data.title || title;
+      options.body = data.message || options.body;
+    } catch (e) {
+      // ලැබෙන දත්ත Text එකක් නම්
+      options.body = event.data.text();
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// Notification එකක් මත ක්ලික් කළ විට ඇප් එක විවෘත කිරීම
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      if (clientList.length > 0) {
+        return clientList[0].focus();
+      }
+      return clients.openWindow('./index.html');
+    })
+  );
+});
