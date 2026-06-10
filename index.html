@@ -427,7 +427,7 @@
           <span id="btn-sms-txt">✉️ Send SMS</span>
         </button>
 
-        <button id="openPopup" class="notify-btn" type="button">
+        <button id="openPopup" class="notify-btn">
           <span id="btn-notify-txt">🔔 Send Notification</span>
         </button>
 
@@ -437,10 +437,10 @@
             <input type="text" id="title" placeholder="Notification Title">
             <textarea id="message" placeholder="Type your message..."></textarea>
             <div class="actions">
-              <button onclick="sendNotification()" class="send-btn" type="button">
+              <button onclick="sendNotification()" class="send-btn">
                 <span id="send-btn-txt">Send</span>
               </button>
-              <button onclick="closePopup()" class="close-btn" type="button">
+              <button onclick="closePopup()" class="close-btn">
                 <span id="close-btn-txt">Close</span>
               </button>
             </div>
@@ -453,10 +453,11 @@
   <div class="footer" id="txt-footer">Powered by K-Win | Design by Janith Didula</div>
 
   <script>
-    const SUPABASE_URL = "https://qfwqfcwakstwovccogtx.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA";
+    // ඔබේ නිවැරදි Supabase තොරතුරු ඇතුළත් කරන්න
+    const SUPABASE_URL = "https://nuzfxdozbjiqxwjwhwxg.supabase.co"; 
+    const SUPABASE_ANON_KEY = "PASTE_YOUR_REAL_ANON_KEY_HERE"; 
 
-    const supabaseClient = supabase.createClient(eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentLang = 'en';
     let deferredPrompt = null;
@@ -593,6 +594,7 @@
 
     async function askNotificationPermission() {
       if (!("Notification" in window)) return;
+
       if (Notification.permission === "default") {
         try {
           await Notification.requestPermission();
@@ -616,17 +618,26 @@
       }
 
       try {
-        const { error } = await supabaseClient
-          .from("notifications")
-          .insert([
-            {
-              title: title || "K-Win Notification",
-              message: message,
-              created_at: new Date().toISOString()
-            }
-          ]);
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Prefer": "return=representation"
+          },
+          body: JSON.stringify({
+            title: title || "K-Win Notification",
+            message: message,
+            created_at: new Date().toISOString()
+          })
+        });
 
-        if (error) throw error;
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(JSON.stringify(data));
+        }
 
         alert(
           currentLang === "si"
@@ -639,6 +650,7 @@
         document.getElementById("title").value = "";
         document.getElementById("message").value = "";
         closePopup();
+
       } catch (err) {
         console.error("Notification Error:", err);
         alert("Failed: " + err.message);
@@ -699,6 +711,7 @@ END:VCARD`;
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
+    // වෙනස් කරන ලදි: මෙහි encodeURIComponent භාවිතයෙන් පණිවිඩය සකසා ඇත
     function sendAction(type) {
       let num = document.getElementById('phone').value.trim();
       if (num.length < 10) return alert(langData[currentLang].alert);
@@ -773,7 +786,7 @@ END:VCARD`;
     });
 
     document.getElementById('u-name').addEventListener('blur', function() {
-      const currentName = this.value.trim();
+      let currentName = this.value.trim();
       if (currentName !== "" && !currentName.includes("K-Win Client")) {
         this.value = currentName + " - K-Win Client";
       }
