@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>K-Win</title>
 
@@ -11,8 +11,6 @@
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
   <style>
     :root { --accent: #ffffff; --bg: #000000; --card: #121212; --text: #ffffff; }
@@ -343,7 +341,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -414,8 +411,8 @@
     let currentLang = 'en';
     let deferredPrompt;
 
-    const SUPABASE_FUNCTION_URL = "https://YOUR_PROJECT.supabase.co/functions/v1/send-notification";
-    const ONE_SIGNAL_APP_ID = "ebdc2cd4-a21d-434f-ab63-d60f21ad3295";
+    // මෙතන ඔයාගේ Supabase Edge Function URL දාන්න
+    const SUPABASE_FUNCTION_URL = "https://YOUR_PROJECT_REF.supabase.co/functions/v1/send-notification";
 
     function setLang(lang) {
       currentLang = lang;
@@ -453,12 +450,7 @@
       }
     });
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail', err));
-      });
-    }
-
+    // PWA install support only
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -542,10 +534,7 @@
     function closePopup() {
       document.getElementById("popup").style.display = "none";
     }
-    
-const SUPABASE_FUNCTION_URL =
-"https://qfwqfcwakstwovccogtx.supabase.co/functions/v1/send-notification";
-    
+
     async function sendNotification() {
       const title = document.getElementById("title").value.trim();
       const message = document.getElementById("message").value.trim();
@@ -560,14 +549,15 @@ const SUPABASE_FUNCTION_URL =
       }
 
       try {
-       const res = await fetch(SUPABASE_FUNCTION_URL, {
+        const res = await fetch(SUPABASE_FUNCTION_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
             title: title || "K-Win Notification",
-            message
+            message: message,
+            url: "https://kwinproduction.github.io/K-Win-Card/"
           })
         });
 
