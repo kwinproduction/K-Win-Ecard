@@ -510,62 +510,72 @@
         function closePopup() {
             popup.style.display = "none";
         }
-// --- Send Notification (Direct to OneSignal - No Vercel Needed) ---
 async function sendNotification() {
-    const title = document.getElementById("title").value.trim();
-    const message = document.getElementById("message").value.trim();
-    
-    // මැසේජ් එකක් ඇතුලත් කරලා නැත්නම් Alert එකක් පෙන්වීම
+
+    const title = document.getElementById("title").value;
+    const message = document.getElementById("message").value;
+
     if (!message) {
-        alert(currentLang === 'si' ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න" : (currentLang === 'ta' ? "செய்தியை உள்ளிடவும்" : "Enter a message"));
+        alert("Enter message");
         return;
     }
-    
-    // ඔයාගේ OneSignal තොරතුරු
-    const appId = "ebdc2cd4-a21d-434f-ab63-d60f21ad3295";
-    const restApiKey = "os_v2_app_5poczvfcdvbu7k3d2yhsdljsswax346znmdubr5cnz3j3jndr4zceolh5jmvxis7vqd7lq7udilqgqgaazigya75efmc4whybmxmina"; 
-    
-    try {
-        // කෙලින්ම OneSignal API එකටම Request එක යවනවා
-        const response = await fetch("https://onesignal.com/api/v1/notifications", {
+
+    const res = await fetch(
+        "https://YOUR_PROJECT.supabase.co/functions/v1/send-notification",
+        {
             method: "POST",
             headers: {
-                "Content-Type": "application/json; charset=utf-8",
-                "Authorization": `Basic ${restApiKey}` // <-- මෙන්න මෙතන Variable එකේ නම නිවැරදි කරා
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                app_id: appId,
-                included_segments: ["Subscribed Users"], // ඇප් එකේ ඉන්න හැමෝටම මැසේජ් එක යන්න
-                headings: {
-                    en: title || "K-Win Alert" // ටයිටල් එකක් ලීවේ නැත්නම් ඩිෆෝල්ට් මේක වැටෙනවා
-                },
-                contents: {
-                    en: message
-                }
+                title,
+                message
             })
-        });
-        
-        const result = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(result.errors ? result.errors[0] : `HTTP status ${response.status}`);
         }
-        
-        console.log("Success:", result);
-        
-        // සාර්ථකයි නම් භාෂාව අනුව Alert එකක් පෙන්වීම
-        alert(currentLang === 'si' ? "දැනුම්දීම සාර්ථකව යවන ලදී!" : (currentLang === 'ta' ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!" : "Notification Sent Successfully"));
-        
-        // Input fields ටික Clear කර Popup එක Close කිරීම
+    );
+
+    if (res.ok) {
+        alert("Notification Sent ✅");
+
         document.getElementById("title").value = "";
         document.getElementById("message").value = "";
-        closePopup();
-        
-    } catch (error) {
-        console.error("Error sending notification:", error);
-        alert("Failed to send notification: " + error.message);
+    } else {
+        alert("Failed ❌");
     }
 }
+        import { serve } from "https://deno.land/std/http/server.ts";
+
+serve(async (req) => {
+
+  const { title, message } = await req.json();
+
+  const response = await fetch("https://api.onesignal.com/notifications", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "os_v2_app_5poczvfcdvbu7k3d2yhsdljssx6xjc6nkzbehuffylpjoaim4yl4k23uzsbjzsiybabfl3a7grsgkxho5wnbybzyptw2lvh7hwpfvwq" + Deno.env.get("ONESIGNAL_REST_API_KEY")
+    },
+    body: JSON.stringify({
+      app_id: "ebdc2cd4-a21d-434f-ab63-d60f21ad3295",
+      included_segments: ["Subscribed Users"],
+      headings: {
+        en: title || "K-Win Notification"
+      },
+      contents: {
+        en: message
+      }
+    })
+  });
+
+  const data = await response.json();
+
+  return new Response(JSON.stringify(data), {
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+});
     </script>
 </body>
 </html>
