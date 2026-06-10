@@ -1,581 +1,615 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>K-Win</title>
-    
-    <!-- PWA Manifest (Base64) -->
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiS1dpbiIsInNob3J0X25hbWUiOiJLLVdpbiIsInN0YXJ0X3VybCI6ImluZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDAwMDAwIiwidGhlbWVfY29sb3ciOiIjZmZmZmZmIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20va3dpbnByb2R1Y3Rpb24vSy1XaW4tRWNhcmQvbWFpbi9sb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
-    <link rel="icon" type="image/jpeg" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
-    <meta name="theme-color" content="#000000">    
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <style>
-        :root { --accent: #ffffff; --bg: #000000; --card: #121212; --text: #ffffff; }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-    
-        /* Fixed to screen and preventing scroll */
-        body, html { 
-            height: 100dvh; 
-            width: 100%; 
-            background-color: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            overflow: hidden; 
-        }
-        
-        body { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: space-between;
-            padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px; 
-        }
-        /* Fixed Install Banner */
-        #install-banner { 
-            display: none; width: 100%; background: var(--accent); color: #000; 
-            padding: 12px 20px; justify-content: space-between; align-items: center; 
-            font-weight: bold; position: fixed; top: 0; left: 0; z-index: 9999; 
-            box-shadow: 0 4px 15px rgba(255,255,255,0.1);
-        }
-        #install-banner button { 
-            background: #000; color: var(--accent); border: none; 
-            padding: 8px 18px; border-radius: 10px; font-weight: 900; cursor: pointer;
-        }
-        /* iOS Instruction Overlay */
-        #ios-instructions {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.98); z-index: 100000; color: white; padding: 30px;
-            box-sizing: border-box; text-align: center; justify-content: center; flex-direction: column; align-items: center;
-            backdrop-filter: blur(20px);
-        }
-        .instruction-step { 
-            background: rgba(255, 255, 255, 0.05); padding: 18px; border-radius: 15px; 
-            margin: 12px 0; width: 100%; font-size: 15px; border: 1px solid rgba(255, 255, 255, 0.1); 
-        }
-        .highlight-gold { color: #ffcc00; font-weight: bold; }
-        /* UI Elements */
-        .lang-bar { 
-            display: flex; gap: 8px; margin-top: 60px; background: #111; 
-            padding: 5px; border-radius: 25px; border: 1px solid #222; 
-        }
-        .lang-btn { 
-            background: transparent; color: #888; border: none; padding: 8px 15px; 
-            border-radius: 20px; font-size: 0.75rem; cursor: pointer; font-weight: bold; 
-        }
-        .lang-btn.active { background: var(--accent); color: #000; }
-        .header { text-align: center; margin-top: 10px; }
-        .logo-circle { width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--accent); padding: 4px; margin: 0 auto 10px; overflow: hidden; }
-        .logo-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        h1 { font-size: 1.4rem; letter-spacing: 2px; color: var(--accent); font-weight: 900; }
-        .container { 
-            width: 100%; 
-            max-width: 380px; 
-            flex-grow: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-        }
-        .card { 
-            background: var(--card); border-radius: 30px; padding: 25px; 
-            border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%;
-        }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.7rem; color: var(--accent); font-weight: bold; margin-bottom: 8px; text-align: center; opacity: 0.8; }
-        input { 
-            width: 100%; background: #000; border: 1px solid #333; border-radius: 15px; 
-            color: var(--accent); padding: 12px; font-size: 1.1rem; font-weight: bold; 
-            text-align: center; outline: none; 
-        }
-        input#phone { font-size: 1.4rem; letter-spacing: 2px; }
-        .btn-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-        .btn { 
-            width: 100%; padding: 15px; border-radius: 15px; border: none; 
-            font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; 
-            justify-content: center; gap: 10px; cursor: pointer; transition: 0.1s;
-        }
-        .btn-save { background: var(--accent); color: #000; }
-        .btn-wa { background: #25D366; color: #fff; }
-        .btn-sms { background: #1d9bf0; color: #fff; }
-        .btn:active { transform: scale(0.95); }
-        .footer { padding-bottom: 20px; font-size: 0.65rem; opacity: 0.4; text-align: center; width: 100%; }
-        /* Overlay */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
-        .overlay-content { background: #0a1428; width: 100%; max-width: 320px; padding: 25px; border-radius: 25px; border: 1px solid var(--gold); text-align: center; }
-        .tt-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; }
-        
-        #pwa-installer { display: none; position: fixed; top: 10px; width: 90%; max-width: 380px; background: var(--gold); color: #000; padding: 12px; border-radius: 50px; z-index: 9999; text-align: center; font-weight: 800; font-size: 0.8rem; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .footer { margin-top: 30px; font-size: 0.6rem; opacity: 0.4; text-align: center; color: #fff; padding-bottom: 10px; }
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            /* Prevent scrolling completely */
-            overflow: hidden; 
-            /* Prevent pull-to-refresh / scrolling on mobile devices */
-            position: fixed; 
-        }
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-size: cover;
-            background-position: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        /* Enable internal scrolling inside the card if needed */
-        .card {
-            max-height: 95vh;
-            overflow-y: auto;
-            scrollbar-width: none; /* Hide scrollbar for Firefox */
-        }
-        .card::-webkit-scrollbar {
-            display: none; /* Hide scrollbar for Chrome/Safari */
-        }
-        
-        .notify-btn {
-            background: #007bff;
-            color: #fff;
-            border: none;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: 0.1s;
-            box-shadow: 0 4px 12px rgba(0,0,0,.2);
-        }
-        .notify-btn:active { transform: scale(0.95); }
-        .popup {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.85);
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            backdrop-filter: blur(5px);
-        }
-        .popup-content {
-            width: 90%;
-            max-width: 380px;
-            background: var(--card);
-            border: 1px solid #222;
-            border-radius: 25px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,.5);
-            animation: pop .25s ease;
-        }
-        @keyframes pop {
-            from {
-                transform: scale(.8);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        .popup-content h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            text-align: center;
-            color: var(--accent);
-            font-weight: 900;
-            font-size: 1.3rem;
-        }
-        .popup-content input,
-        .popup-content textarea {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 12px;
-            margin-bottom: 15px;
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 12px;
-            color: var(--accent);
-            font-size: 0.95rem;
-            outline: none;
-        }
-        .popup-content textarea {
-            height: 120px;
-            resize: none;
-        }
-        .actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .send-btn,
-        .close-btn {
-            flex: 1;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-            transition: 0.1s;
-        }
-        .send-btn:active, .close-btn:active { transform: scale(0.95); }
-        .send-btn {
-            background: #28a745;
-            color: white;
-        }
-        .close-btn {
-            background: #dc3545;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>K-Win</title>
+
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiS1dpbiIsInNob3J0X25hbWUiOiJLLVdpbiIsInN0YXJ0X3VybCI6ImluZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMDAwMDAwIiwidGhlbWVfY29sb3IiOiIjZmZmZmZmIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20va3dpbnByb2R1Y3Rpb24vSy1XaW4tRWNhcmQvbWFpbi9sb2dvLmpwZWciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
+  <link rel="icon" type="image/jpeg" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
+  <meta name="theme-color" content="#000000">
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+  <style>
+    :root { --accent: #ffffff; --bg: #000000; --card: #121212; --text: #ffffff; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: fixed;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px;
+    }
+    #install-banner {
+      display: none;
+      width: 100%;
+      background: var(--accent);
+      color: #000;
+      padding: 12px 20px;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+    }
+    #install-banner button {
+      background: #000;
+      color: var(--accent);
+      border: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    #ios-instructions {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.98);
+      z-index: 100000;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      backdrop-filter: blur(20px);
+    }
+    .instruction-step {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 18px;
+      border-radius: 15px;
+      margin: 12px 0;
+      width: 100%;
+      font-size: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .highlight-gold { color: #ffcc00; font-weight: bold; }
+    .lang-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 60px;
+      background: #111;
+      padding: 5px;
+      border-radius: 25px;
+      border: 1px solid #222;
+    }
+    .lang-btn {
+      background: transparent;
+      color: #888;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .lang-btn.active { background: var(--accent); color: #000; }
+    .header { text-align: center; margin-top: 10px; }
+    .logo-circle {
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      padding: 4px;
+      margin: 0 auto 10px;
+      overflow: hidden;
+    }
+    .logo-circle img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    h1 { font-size: 1.4rem; letter-spacing: 2px; color: var(--accent); font-weight: 900; }
+    .container {
+      width: 100%;
+      max-width: 380px;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 30px;
+      padding: 25px;
+      border: 1px solid #222;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      width: 100%;
+      max-height: 95vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .card::-webkit-scrollbar { display: none; }
+    .input-group { margin-bottom: 15px; }
+    label {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--accent);
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-align: center;
+      opacity: 0.8;
+    }
+    input, textarea {
+      width: 100%;
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 15px;
+      color: var(--accent);
+      padding: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-align: center;
+      outline: none;
+    }
+    input#phone { font-size: 1.4rem; letter-spacing: 2px; }
+    .btn-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+    .btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 15px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .btn-save { background: var(--accent); color: #000; }
+    .btn-wa { background: #25D366; color: #fff; }
+    .btn-sms { background: #1d9bf0; color: #fff; }
+    .notify-btn {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 15px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: 0.1s;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    }
+    .btn:active, .notify-btn:active { transform: scale(0.95); }
+    .footer {
+      margin-top: 20px;
+      font-size: 0.6rem;
+      opacity: 0.4;
+      text-align: center;
+      color: #fff;
+      padding-bottom: 10px;
+      width: 100%;
+    }
+    .popup {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+    .popup-content {
+      width: 90%;
+      max-width: 380px;
+      background: var(--card);
+      border: 1px solid #222;
+      border-radius: 25px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.5);
+      animation: pop .25s ease;
+    }
+    @keyframes pop {
+      from { transform: scale(.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .popup-content h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 1.3rem;
+    }
+    .popup-content input,
+    .popup-content textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-bottom: 15px;
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 12px;
+      color: var(--accent);
+      font-size: 0.95rem;
+      outline: none;
+      text-align: left;
+    }
+    .popup-content textarea {
+      height: 120px;
+      resize: none;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .send-btn,
+    .close-btn {
+      flex: 1;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      transition: 0.1s;
+    }
+    .send-btn:active, .close-btn:active { transform: scale(0.95); }
+    .send-btn { background: #28a745; color: white; }
+    .close-btn { background: #dc3545; color: white; }
+  </style>
 </head>
 <body>
-    <div id="install-banner">
-        <span id="txt-install-msg">📲 Install K-Win App</span>
-        <button id="btn-install" onclick="handleInstallClick()">INSTALL</button>
-    </div>
-    <div id="ios-instructions">
-        <h2 id="ios-title" style="color: #ffcc00; margin-bottom: 20px;">Add to Home Screen</h2>
-        <div id="ios-steps-container"></div>
-        <button class="btn btn-save" style="margin-top: 30px; width: auto; padding: 12px 45px;" onclick="document.getElementById('ios-instructions').style.display='none'">සම්පූර්ණයි ✅</button>
-    </div>
-    <div class="lang-bar">
-        <button id="btn-en" class="lang-btn active" onclick="setLang('en')">English</button>
-        <button id="btn-si" class="lang-btn" onclick="setLang('si')">සිංහල</button>
-        <button id="btn-ta" class="lang-btn" onclick="setLang('ta')">தமிழ்</button>
-    </div>
-    <div class="header">
-        <div class="logo-circle">
-            <img src="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg" alt="Logo">
-        </div>
-        <h1>Kind Win</h1>
-    </div>
-    <div class="container">
-        <div class="card">
-            <div class="input-group">
-                <label id="lbl-phone">ENTER MOBILE NUMBER</label>
-                <input type="tel" id="phone" placeholder="07XXXXXXXX" maxlength="10">
-            </div>
-            <div class="input-group">
-                <label id="lbl-name">ENTER NAME</label>
-                <input type="text" id="u-name" placeholder="Name">
-            </div>
-            
-            <div class="btn-stack">
-                <button class="btn btn-save" onclick="saveContact()">
-                    <span id="btn-save-txt">👤 Save to Contacts</span>
-                </button>
-                <button class="btn btn-wa" onclick="sendAction('wa')">
-                    <span id="btn-wa-txt">💬 Send WhatsApp</span>
-                </button>
-                <button class="btn btn-sms" onclick="sendAction('sms')">
-                    <span id="btn-sms-txt">✉️ Send SMS</span>
-                </button>
-                
-                <button id="openPopup" class="notify-btn">
-                    <span id="btn-notify-txt">🔔 Send Notification</span>
-                </button>
-                <div id="popup" class="popup">
-                    <div class="popup-content">
-                        <h2 id="popup-title">Send Notification</h2>
-                        <input type="text" id="title" placeholder="Notification Title">
-                        <textarea id="message" placeholder="Type your message..."></textarea>
-                        <div class="actions">
-                            <button onclick="sendNotification()" class="send-btn">
-                                <span id="send-btn-txt">Send</span>
-                            </button>
-                            <button onclick="closePopup()" class="close-btn">
-                                <span id="close-btn-txt">Close</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="footer" id="txt-footer">Powered by K-Win | Design by Janith Didula</div>
-    <script>
-        const langData = {
-            en: {
-                install: "📲 Install K-Win App",
-                installBtn: "INSTALL",
-                label: "ENTER MOBILE NUMBER",
-                nameLabel: "ENTER NAME",
-                save: "👤 Save to Contacts",
-                wa: "💬 Send WhatsApp",
-                sms: "✉️ Send SMS",
-                alert: "Please enter a valid number",
-                vcardName: "K-Win Client",
-                smsMsg: "Get your K-Win Digital Card here:",
-                footer: "Powered by K-Win | Design by Janith Didula",
-                notify: "🔔 Send Notification",
-                notifyTitle: "Send Notification",
-                notifyMessage: "Type your message...",
-                titlePlaceholder: "Notification Title",
-                send: "Send",
-                close: "Close"
-            },
-            si: {
-                install: "📲 Shortcut එකක් සාදාගන්න",
-                installBtn: "INSTALL",
-                label: "දුරකථන අංකය ඇතුළත් කරන්න",
-                nameLabel: "නම ඇතුළත් කරන්න",
-                save: "👤 සම්බන්ධතාවලට එක් කරන්න",
-                wa: "💬 WhatsApp පණිවිඩයක් යවන්න",
-                sms: "✉️ SMS එකක් යවන්න",
-                alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න",
-                vcardName: "K-Win සේවාලාභියා",
-                smsMsg: "ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න:",
-                footer: "K-Win වෙතින් | ජනිත් දිදුලගේ නිර්මාණයකි",
-                notify: "🔔 දැනුම්දීමක් යවන්න",
-                notifyTitle: "දැනුම්දීමක් යවන්න",
-                notifyMessage: "ඔබගේ පණිවිඩය ලියන්න...",
-                titlePlaceholder: "දැනුම්දීමේ මාතෘකාව",
-                send: "යවන්න",
-                close: "වසන්න"
-            },
-            ta: {
-                install: "📲 குறுக்குவழியை உருவாக்கவும்",
-                installBtn: "நிறுவவும்",
-                label: "கைபேசி எண்ணை உள்ளிடவும்",
-                nameLabel: "பெயரை உள்ளிடவும்",
-                save: "👤 தொடர்புகளில் சேமிக்கவும்",
-                wa: "💬 WhatsApp அனுப்பவும்",
-                sms: "✉️ SMS அனுப்பவும்",
-                alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்",
-                vcardName: "K-Win கிளையண்ட்",
-                smsMsg: "உங்கள் K-Win டிஜிட்டல் கார்டை இங்கே பெறுங்கள்:",
-                footer: "K-Win மூலம் இயக்கப்படுகிறது | வடிவமைப்பு: ஜனித் திதுல",
-                notify: "🔔 அறிவிப்பை அனுப்பு",
-                notifyTitle: "அறிவிப்பை அனுப்பு",
-                notifyMessage: "உங்கள் செய்தியை எழுதுங்கள்...",
-                titlePlaceholder: "அறிவிப்பு தலைப்பு",
-                send: "அனுப்பு",
-                close: "மூடு"
-            }
-        };
-        let currentLang = 'en';
-        let deferredPrompt;
-        function setLang(lang) {
-            currentLang = lang;
-            
-            // Toggle active buttons
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.getElementById('btn-' + lang);
-            if(activeBtn) activeBtn.classList.add('active');
-            
-            // Helper to update text contents safely
-            const updateText = (id, text) => {
-                const el = document.getElementById(id);
-                if (el) el.innerText = text;
-            };
-            // Update text elements
-            updateText('txt-install-msg', langData[lang].install);
-            updateText('btn-install', langData[lang].installBtn);
-            updateText('lbl-phone', langData[lang].label);
-            updateText('lbl-name', langData[lang].nameLabel);
-            updateText('btn-save-txt', langData[lang].save);
-            updateText('btn-wa-txt', langData[lang].wa);
-            updateText('btn-sms-txt', langData[lang].sms);
-            updateText('txt-footer', langData[lang].footer);
-            updateText('btn-notify-txt', langData[lang].notify);
-            updateText('popup-title', langData[lang].notifyTitle);
-            updateText('send-btn-txt', langData[lang].send);
-            updateText('close-btn-txt', langData[lang].close);
-            // Update placeholders
-            const titleInput = document.getElementById('title');
-            if (titleInput) titleInput.placeholder = langData[lang].titlePlaceholder;
-            const messageInput = document.getElementById('message');
-            if (messageInput) messageInput.placeholder = langData[lang].notifyMessage;
-        }
-        // --- Haptic Feedback ---
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn') || e.target.closest('.notify-btn') || e.target.tagName === 'BUTTON') {
-                if (navigator.vibrate) {
-                    navigator.vibrate(40);
-                }
-            }
-        });
-        // --- PWA Service Worker ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail', err));
-            });
-        }
-        // --- Install Prompt Handling ---
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-banner').style.display = 'flex';
-        });
-        function handleInstallClick() {
-            const ua = window.navigator.userAgent.toLowerCase();
-            const isIos = /iphone|ipad|ipod/.test(ua);
-            
-            if (isIos) {
-                const container = document.getElementById('ios-steps-container');
-                const isChromeIos = /crios/.test(ua);
-                let stepsHtml = '';
-                
-                if (isChromeIos) {
-                    stepsHtml = `
-                        <p style="opacity: 0.9; margin-bottom: 15px;">Chrome හරහා Shortcut එකක් සාදාගන්න:</p>
-                        <div class="instruction-step">1️⃣ ඉහළ දකුණු කෙළවරේ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
-                        <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
-                        <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
-                    `;
-                } else {
-                    stepsHtml = `
-                        <p style="opacity: 0.9; margin-bottom: 15px;">Safari හරහා Shortcut එකක් සාදාගන්න:</p>
-                        <div class="instruction-step">1️⃣ පහළ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
-                        <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
-                        <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
-                    `;
-                }
-                container.innerHTML = stepsHtml;
-                document.getElementById('ios-instructions').style.display = 'flex';
-            } else if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choice) => {
-                    if (choice.outcome === 'accepted') document.getElementById('install-banner').style.display = 'none';
-                    deferredPrompt = null;
-                });
-            } else {
-                alert("Please use your browser's menu to 'Add to Home Screen'.");
-            }
-        }
-        // --- Core Actions ---
-        function saveContact() {
-            const num = document.getElementById('phone').value.trim();
-            let uName = document.getElementById('u-name').value.trim();
-            if (num.length < 10) return alert(langData[currentLang].alert);
-            let finalName;
-            if (uName) {
-                finalName = uName.includes("K-Win client") ? uName : `${uName} K-Win client`;
-            } else {
-                finalName = langData[currentLang].vcardName;
-            }
-            const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${finalName}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
-            const blob = new Blob([vcard], { type: "text/vcard" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `KWin_${num}.vcf`;
-            a.click();
-        }
-        function sendAction(type) {
-            let num = document.getElementById('phone').value.trim();
-            if (num.length < 10) return alert(langData[currentLang].alert);
-            if (num.startsWith('0')) num = '94' + num.substring(1);
-            const link = "https://kwinproduction.github.io/K-Win-Card/";
-            const msg = `${langData[currentLang].smsMsg} ${link}`;
-            if (type === 'wa') {
-                window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
-            } else {
-                const sep = (navigator.userAgent.match(/iphone|ipad|ipod/i)) ? '&' : '?';
-                window.location.href = `sms:+${num}${sep}body=${encodeURIComponent(msg)}`;
-            }
-        }
-        window.onload = () => {
-            setLang('en');
-            const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-            const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-            
-            if (!isStandalone) {
-                if (isIos) {
-                    document.getElementById('install-banner').style.display = 'flex';
-                }
-            }
-        };
-        const nameInput = document.getElementById('u-name');
-        nameInput.addEventListener('blur', function() {
-            let currentName = this.value.trim();
-            if (currentName !== "" && !currentName.includes("K-Win client")) {
-                this.value = currentName + " K-Win client";
-            }
-        });
-        // --- Popup Management ---
-        const popup = document.getElementById("popup");
-        document.getElementById("openPopup").addEventListener("click", () => {
-            popup.style.display = "flex";
-        });
-        function closePopup() {
-            popup.style.display = "none";
-        }
-async function sendNotification() {
+  <div id="install-banner">
+    <span id="txt-install-msg">📲 Install K-Win App</span>
+    <button id="btn-install" onclick="handleInstallClick()">INSTALL</button>
+  </div>
 
-    const title = document.getElementById("title").value;
-    const message = document.getElementById("message").value;
+  <div id="ios-instructions">
+    <h2 id="ios-title" style="color: #ffcc00; margin-bottom: 20px;">Add to Home Screen</h2>
+    <div id="ios-steps-container"></div>
+    <button class="btn btn-save" style="margin-top: 30px; width: auto; padding: 12px 45px;" onclick="document.getElementById('ios-instructions').style.display='none'">සම්පූර්ණයි ✅</button>
+  </div>
 
-    if (!message) {
-        alert("Enter message");
-        return;
+  <div class="lang-bar">
+    <button id="btn-en" class="lang-btn active" onclick="setLang('en')">English</button>
+    <button id="btn-si" class="lang-btn" onclick="setLang('si')">සිංහල</button>
+    <button id="btn-ta" class="lang-btn" onclick="setLang('ta')">தமிழ்</button>
+  </div>
+
+  <div class="header">
+    <div class="logo-circle">
+      <img src="https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg" alt="Logo">
+    </div>
+    <h1>Kind Win</h1>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="input-group">
+        <label id="lbl-phone">ENTER MOBILE NUMBER</label>
+        <input type="tel" id="phone" placeholder="07XXXXXXXX" maxlength="10">
+      </div>
+
+      <div class="input-group">
+        <label id="lbl-name">ENTER NAME</label>
+        <input type="text" id="u-name" placeholder="Name">
+      </div>
+
+      <div class="btn-stack">
+        <button class="btn btn-save" onclick="saveContact()">
+          <span id="btn-save-txt">👤 Save to Contacts</span>
+        </button>
+        <button class="btn btn-wa" onclick="sendAction('wa')">
+          <span id="btn-wa-txt">💬 Send WhatsApp</span>
+        </button>
+        <button class="btn btn-sms" onclick="sendAction('sms')">
+          <span id="btn-sms-txt">✉️ Send SMS</span>
+        </button>
+
+        <button id="openPopup" class="notify-btn">
+          <span id="btn-notify-txt">🔔 Send Notification</span>
+        </button>
+
+        <div id="popup" class="popup">
+          <div class="popup-content">
+            <h2 id="popup-title">Send Notification</h2>
+            <input type="text" id="title" placeholder="Notification Title">
+            <textarea id="message" placeholder="Type your message..."></textarea>
+            <div class="actions">
+              <button onclick="sendNotification()" class="send-btn">
+                <span id="send-btn-txt">Send</span>
+              </button>
+              <button onclick="closePopup()" class="close-btn">
+                <span id="close-btn-txt">Close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer" id="txt-footer">Powered by K-Win | Design by Janith Didula</div>
+
+  <script>
+    const langData = {
+      en: {
+        install: "📲 Install K-Win App",
+        installBtn: "INSTALL",
+        label: "ENTER MOBILE NUMBER",
+        nameLabel: "ENTER NAME",
+        save: "👤 Save to Contacts",
+        wa: "💬 Send WhatsApp",
+        sms: "✉️ Send SMS",
+        alert: "Please enter a valid number",
+        vcardName: "K-Win Client",
+        smsMsg: "Get your K-Win Digital Card here:",
+        footer: "Powered by K-Win | Design by Janith Didula",
+        notify: "🔔 Send Notification",
+        notifyTitle: "Send Notification",
+        notifyMessage: "Type your message...",
+        titlePlaceholder: "Notification Title",
+        send: "Send",
+        close: "Close"
+      },
+      si: {
+        install: "📲 Shortcut එකක් සාදාගන්න",
+        installBtn: "INSTALL",
+        label: "දුරකථන අංකය ඇතුළත් කරන්න",
+        nameLabel: "නම ඇතුළත් කරන්න",
+        save: "👤 සම්බන්ධතාවලට එක් කරන්න",
+        wa: "💬 WhatsApp පණිවිඩයක් යවන්න",
+        sms: "✉️ SMS එකක් යවන්න",
+        alert: "කරුණාකර නිවැරදි අංකයක් ඇතුළත් කරන්න",
+        vcardName: "K-Win සේවාලාභියා",
+        smsMsg: "ඔබේ K-Win Digital Card එක මෙතැනින් ලබාගන්න:",
+        footer: "K-Win වෙතින් | ජනිත් දිදුලගේ නිර්මාණයකි",
+        notify: "🔔 දැනුම්දීමක් යවන්න",
+        notifyTitle: "දැනුම්දීමක් යවන්න",
+        notifyMessage: "ඔබගේ පණිවිඩය ලියන්න...",
+        titlePlaceholder: "දැනුම්දීමේ මාතෘකාව",
+        send: "යවන්න",
+        close: "වසන්න"
+      },
+      ta: {
+        install: "📲 குறுக்குவழியை உருவாக்கவும்",
+        installBtn: "நிறுவவும்",
+        label: "கைபேசி எண்ணை உள்ளிடவும்",
+        nameLabel: "பெயரை உள்ளிடவும்",
+        save: "👤 தொடர்புகளில் சேமிக்கவும்",
+        wa: "💬 WhatsApp அனுப்பவும்",
+        sms: "✉️ SMS அனுப்பவும்",
+        alert: "செல்லுபடியாகும் எண்ணை உள்ளிடவும்",
+        vcardName: "K-Win கிளையண்ட்",
+        smsMsg: "உங்கள் K-Win டிஜிட்டல் கார்டை இங்கே பெறுங்கள்:",
+        footer: "K-Win மூலம் இயக்கப்படுகிறது | வடிவமைப்பு: ஜனித் திதுல",
+        notify: "🔔 அறிவிப்பை அனுப்பு",
+        notifyTitle: "அறிவிப்பை அனுப்பு",
+        notifyMessage: "உங்கள் செய்தியை எழுதுங்கள்...",
+        titlePlaceholder: "அறிவிப்பு தலைப்பு",
+        send: "அனுப்பு",
+        close: "மூடு"
+      }
+    };
+
+    let currentLang = 'en';
+    let deferredPrompt;
+
+    const SUPABASE_FUNCTION_URL = "https://YOUR_PROJECT.supabase.co/functions/v1/send-notification";
+    const ONE_SIGNAL_APP_ID = "ebdc2cd4-a21d-434f-ab63-d60f21ad3295";
+
+    function setLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-' + lang);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const updateText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+      };
+
+      updateText('txt-install-msg', langData[lang].install);
+      updateText('btn-install', langData[lang].installBtn);
+      updateText('lbl-phone', langData[lang].label);
+      updateText('lbl-name', langData[lang].nameLabel);
+      updateText('btn-save-txt', langData[lang].save);
+      updateText('btn-wa-txt', langData[lang].wa);
+      updateText('btn-sms-txt', langData[lang].sms);
+      updateText('txt-footer', langData[lang].footer);
+      updateText('btn-notify-txt', langData[lang].notify);
+      updateText('popup-title', langData[lang].notifyTitle);
+      updateText('send-btn-txt', langData[lang].send);
+      updateText('close-btn-txt', langData[lang].close);
+
+      const titleInput = document.getElementById('title');
+      if (titleInput) titleInput.placeholder = langData[lang].titlePlaceholder;
+      const messageInput = document.getElementById('message');
+      if (messageInput) messageInput.placeholder = langData[lang].notifyMessage;
     }
 
-    const res = await fetch(
-        "https://YOUR_PROJECT.supabase.co/functions/v1/send-notification",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                title,
-                message
-            })
-        }
-    );
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.btn') || e.target.closest('.notify-btn') || e.target.tagName === 'BUTTON') {
+        if (navigator.vibrate) navigator.vibrate(40);
+      }
+    });
 
-    if (res.ok) {
-        alert("Notification Sent ✅");
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-banner').style.display = 'flex';
+    });
+
+    function handleInstallClick() {
+      const ua = window.navigator.userAgent.toLowerCase();
+      const isIos = /iphone|ipad|ipod/.test(ua);
+
+      if (isIos) {
+        const container = document.getElementById('ios-steps-container');
+        const isChromeIos = /crios/.test(ua);
+        let stepsHtml = '';
+
+        if (isChromeIos) {
+          stepsHtml = `
+            <p style="opacity: 0.9; margin-bottom: 15px;">Chrome හරහා Shortcut එකක් සාදාගන්න:</p>
+            <div class="instruction-step">1️⃣ ඉහළ දකුණු කෙළවරේ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
+            <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
+            <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
+          `;
+        } else {
+          stepsHtml = `
+            <p style="opacity: 0.9; margin-bottom: 15px;">Safari හරහා Shortcut එකක් සාදාගන්න:</p>
+            <div class="instruction-step">1️⃣ පහළ ඇති <span class="highlight-gold">Share</span> බොත්තම ඔබන්න.</div>
+            <div class="instruction-step">2️⃣ මඳක් පහළට ගොස් <span class="highlight-gold">"Add to Home Screen"</span> යන්න තෝරන්න.</div>
+            <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
+          `;
+        }
+        container.innerHTML = stepsHtml;
+        document.getElementById('ios-instructions').style.display = 'flex';
+      } else if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choice) => {
+          if (choice.outcome === 'accepted') document.getElementById('install-banner').style.display = 'none';
+          deferredPrompt = null;
+        });
+      } else {
+        alert("Please use your browser's menu to 'Add to Home Screen'.");
+      }
+    }
+
+    function saveContact() {
+      const num = document.getElementById('phone').value.trim();
+      let uName = document.getElementById('u-name').value.trim();
+      if (num.length < 10) return alert(langData[currentLang].alert);
+
+      let finalName;
+      if (uName) {
+        finalName = uName.includes("K-Win client") ? uName : `${uName} K-Win client`;
+      } else {
+        finalName = langData[currentLang].vcardName;
+      }
+
+      const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${finalName}\nTEL;TYPE=CELL:${num}\nEND:VCARD`;
+      const blob = new Blob([vcard], { type: "text/vcard" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `KWin_${num}.vcf`;
+      a.click();
+    }
+
+    function sendAction(type) {
+      let num = document.getElementById('phone').value.trim();
+      if (num.length < 10) return alert(langData[currentLang].alert);
+      if (num.startsWith('0')) num = '94' + num.substring(1);
+
+      const link = "https://kwinproduction.github.io/K-Win-Card/";
+      const msg = `${langData[currentLang].smsMsg} ${link}`;
+
+      if (type === 'wa') {
+        window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+      } else {
+        const sep = (/iphone|ipad|ipod/i).test(navigator.userAgent) ? '&' : '?';
+        window.location.href = `sms:+${num}${sep}body=${encodeURIComponent(msg)}`;
+      }
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    async function sendNotification() {
+      const title = document.getElementById("title").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      if (!message) {
+        alert(
+          currentLang === 'si' ? "කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න" :
+          currentLang === 'ta' ? "செய்தியை உள்ளிடவும்" :
+          "Enter a message"
+        );
+        return;
+      }
+
+      try {
+        const res = await fetch(SUPABASE_FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            title: title || "K-Win Notification",
+            message
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || data.message || `HTTP ${res.status}`);
+        }
+
+        alert(
+          currentLang === 'si' ? "දැනුම්දීම සාර්ථකව යවන ලදී!" :
+          currentLang === 'ta' ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!" :
+          "Notification Sent Successfully"
+        );
 
         document.getElementById("title").value = "";
         document.getElementById("message").value = "";
-    } else {
-        alert("Failed ❌");
-    }
-}
-        import { serve } from "https://deno.land/std/http/server.ts";
-
-serve(async (req) => {
-
-  const { title, message } = await req.json();
-
-  const response = await fetch("https://api.onesignal.com/notifications", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "os_v2_app_5poczvfcdvbu7k3d2yhsdljssx6xjc6nkzbehuffylpjoaim4yl4k23uzsbjzsiybabfl3a7grsgkxho5wnbybzyptw2lvh7hwpfvwq" + Deno.env.get("ONESIGNAL_REST_API_KEY")
-    },
-    body: JSON.stringify({
-      app_id: "ebdc2cd4-a21d-434f-ab63-d60f21ad3295",
-      included_segments: ["Subscribed Users"],
-      headings: {
-        en: title || "K-Win Notification"
-      },
-      contents: {
-        en: message
+        closePopup();
+      } catch (error) {
+        console.error(error);
+        alert("Failed to send notification: " + error.message);
       }
-    })
-  });
-
-  const data = await response.json();
-
-  return new Response(JSON.stringify(data), {
-    headers: {
-      "Content-Type": "application/json"
     }
-  });
 
-});
-    </script>
+    window.onload = () => {
+      setLang('en');
+      const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+      if (!isStandalone && isIos) {
+        document.getElementById('install-banner').style.display = 'flex';
+      }
+    };
+
+    document.getElementById('u-name').addEventListener('blur', function() {
+      let currentName = this.value.trim();
+      if (currentName !== "" && !currentName.includes("K-Win client")) {
+        this.value = currentName + " K-Win client";
+      }
+    });
+
+    const popup = document.getElementById("popup");
+    document.getElementById("openPopup").addEventListener("click", () => {
+      popup.style.display = "flex";
+    });
+  </script>
 </body>
 </html>
