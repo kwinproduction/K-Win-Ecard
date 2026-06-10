@@ -542,7 +542,10 @@
     function closePopup() {
       document.getElementById("popup").style.display = "none";
     }
-
+    
+const SUPABASE_FUNCTION_URL =
+"https://qfwqfcwakstwovccogtx.supabase.co/functions/v1/send-notification";
+    
     async function sendNotification() {
       const title = document.getElementById("title").value.trim();
       const message = document.getElementById("message").value.trim();
@@ -557,7 +560,7 @@
       }
 
       try {
-        const res = await fetch(SUPABASE_FUNCTION_URL, {
+       const res = await fetch(SUPABASE_FUNCTION_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
