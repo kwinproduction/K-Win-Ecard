@@ -783,6 +783,25 @@
           .catch(err => console.log('SW Registration Fail', err));
       });
     }
+    function startRealtimeListener() {
+  supabaseClient
+    .channel("realtime-notifications")
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "notifications" },
+      (payload) => {
+        const row = payload.new || {};
+        const title = row.title || "K-Win Notification";
+        const message = row.message || "";
+
+        showBrowserNotification(title, message);
+        playNotificationSound();
+      }
+    )
+    .subscribe((status) => {
+      console.log("Supabase status:", status);
+    });
+}
   </script>
 </body>
 </html>
