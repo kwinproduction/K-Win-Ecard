@@ -359,22 +359,6 @@
       background: #dc3545;
       color: white;
     }
-
-    #incomingToast {
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #111;
-      color: #fff;
-      border: 1px solid #2b2b2b;
-      padding: 14px 16px;
-      border-radius: 16px;
-      z-index: 999999;
-      width: min(92vw, 380px);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-    }
   </style>
 </head>
 <body>
@@ -453,8 +437,8 @@
   <div class="footer" id="txt-footer">Powered by K-Win | Design by Janith Didula</div>
 
   <script>
-    const SUPABASE_URL = "https://nuzfxdozbjiqxwjwhwxg.supabase.co"; 
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA"; 
+    const SUPABASE_URL = "https://nuzfxdozbjiqxwjwhwxg.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emZ4ZG96YmppcXh3andod3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDA4ODgsImV4cCI6MjA5NjY3Njg4OH0.07wQvTq68cO07dyMO4unVe3P4RtnVWllKL1K2_h3BQA";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -556,47 +540,56 @@
       document.getElementById("popup").style.display = "none";
     }
 
-    function showIncomingToast(title, message) {
-      let box = document.getElementById("incomingToast");
+    function playNotificationSound() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
-      if (!box) {
-        box = document.createElement("div");
-        box.id = "incomingToast";
-        document.body.appendChild(box);
+        osc.type = "sine";
+        osc.frequency.value = 880;
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.28);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.30);
+
+        setTimeout(() => ctx.close(), 500);
+      } catch (e) {
+        console.log("Sound blocked:", e);
       }
-
-      box.innerHTML = `
-        <div style="font-weight:800; margin-bottom:6px; color:#00f2ff;">${title || "K-Win Notification"}</div>
-        <div style="font-size:14px; line-height:1.5;">${message || ""}</div>
-      `;
-
-      setTimeout(() => {
-        if (box) box.remove();
-      }, 4500);
     }
 
-    // වෙනස් කරන ලදි: සැබෑ System Push Notification එකක් ලෙස ක්‍රියාත්මක වීමට Service Worker භාවිතය
     function showBrowserNotification(title, message) {
       if (!("Notification" in window)) return;
       if (Notification.permission !== "granted") return;
 
-      // App එක background එකේ ඇති විට පවා ක්‍රියා කිරීමට Service Worker එක හරහා පෙන්වීම
       if (navigator.serviceWorker.controller) {
         navigator.serviceWorker.ready.then((registration) => {
           registration.showNotification(title || "K-Win Notification", {
             body: message || "",
             icon: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
             badge: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
-            vibrate: [200, 100, 200]
+            vibrate: [200, 100, 200],
+            silent: false
           });
         });
       } else {
-        // Fallback: Service worker සක්‍රීය නැතිනම් සාමාන්‍ය ක්‍රමය
         const n = new Notification(title || "K-Win Notification", {
           body: message || "",
-          icon: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg"
+          icon: "https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg",
+          silent: false
         });
-        n.onclick = () => { window.focus(); n.close(); };
+        n.onclick = () => {
+          window.focus();
+          n.close();
+        };
       }
     }
 
@@ -638,7 +631,7 @@
         if (!response.ok) throw new Error(JSON.stringify(data));
 
         alert(currentLang === "si" ? "දැනුම්දීම සාර්ථකව යවන ලදී!" : currentLang === "ta" ? "அறிவிப்பு வெற்றிகரமாக அனுப்பப்பட்டது!" : "Notification Sent Successfully!");
-        
+
         document.getElementById("title").value = "";
         document.getElementById("message").value = "";
         closePopup();
@@ -660,9 +653,8 @@
             const title = row.title || "K-Win Notification";
             const message = row.message || "";
 
-            // ඇප් එක ඇතුලේ සහ ෆෝන් එකේ Notification Bar එකට එකවර යැවීම
-            showIncomingToast(title, message);
             showBrowserNotification(title, message);
+            playNotificationSound();
           }
         )
         .subscribe((status) => {
@@ -733,6 +725,7 @@
             <div class="instruction-step">3️⃣ පසුව <span class="highlight-gold">Add</span> බොත්තම ඔබන්න.</div>
           `;
         }
+
         container.innerHTML = stepsHtml;
         document.getElementById('ios-instructions').style.display = 'flex';
       } else if (deferredPrompt) {
@@ -771,6 +764,7 @@
 
     window.addEventListener('DOMContentLoaded', async () => {
       setLang('en');
+
       const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
       const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
 
@@ -782,7 +776,6 @@
       startRealtimeListener();
     });
 
-    // Service Worker ලියාපදිංචි කිරීම
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
