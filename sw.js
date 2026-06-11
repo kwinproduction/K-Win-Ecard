@@ -2,11 +2,11 @@
 // K-Win Admin Service Worker
 // =========================
 
-// 1. Version එක - මෙහි අංකය වෙනස් කළ විට පරණ Cache එක Auto Clear වේ
-const CACHE_VERSION = 'v2.36';
+// Version change කළාම old cache auto delete වෙනවා
+const CACHE_VERSION = 'v2.37';
 const CACHE_NAME = `kwin-admin-cache-${CACHE_VERSION}`;
 
-// 2. Cache කළ යුතු ගොනු ලැයිස්තුව (Assets)
+// Cache කරන්න ඕන assets
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -14,30 +14,21 @@ const ASSETS_TO_CACHE = [
   './logo.jpeg'
 ];
 
-// 3. Service Worker එක Install වීම සහ Assets Cache කිරීම
+// Install
 self.addEventListener('install', (event) => {
-  console.log('K-Win Admin Service Worker: Installing...');
-
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('K-Win Admin Service Worker: Caching Assets');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
-
   self.skipWaiting();
 });
 
-// 4. පරණ Cache Auto-Delete කිරීම (Activate Event)
+// Activate
 self.addEventListener('activate', (event) => {
-  console.log('K-Win Admin Service Worker: Activated');
-
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('K-Win Admin Service Worker: Deleting Old Cache...', cache);
             return caches.delete(cache);
           }
         })
@@ -46,15 +37,17 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 5. ගොනු ලබාදීම (Fetch Event)
+// Fetch
 self.addEventListener('fetch', (event) => {
-  // Supabase API requests cache නොකර live fetch කරන්න
-  if (event.request.url.includes('supabase.co') || event.request.url.includes('onesignal.com')) {
+  const requestUrl = event.request.url;
+
+  // Supabase / OneSignal requests cache නොකර live fetch කරන්න
+  if (requestUrl.includes('supabase.co') || requestUrl.includes('onesignal.com')) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // Navigation requests සඳහා network-first, fallback cache
+  // Navigation requests -> network first, fallback cache
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -68,89 +61,78 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // අනෙක් assets සඳහා cache-first
+  // Other assets -> cache first
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
     }).catch(() => caches.match('./index.html'))
   );
 });
-// සර්විස් වර්කර් එක ස්ථාපනය වීම
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-});
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
-// App එක වසා තිබියදී හෝ Background එකේ ඇතිවිට ලැබෙන Notification පාලනය කිරීම
+// Push notification
 self.addEventListener('push', (event) => {
   let title = 'K-Win Notification';
-  let options = {
-    body: 'உங்களுக்கு ஒரு புதிய செய்தி உள்ளது / ඔබට නව පණිවිඩයක් ඇත.',
-    icon: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
-    badge: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
-    vibrate: [200, 100, 200]
-  };
+  let body = 'ඔබට නව පණිවිඩයක් ඇත.';
+  let icon = 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg';
+  let url = './index.html';
 
   if (event.data) {
     try {
       const data = event.data.json();
       title = data.title || title;
-      options.body = data.message || options.body;
+      body = data.body || data.message || body;
+      icon = data.icon || icon;
+      url = data.url || url;
     } catch (e) {
-      // ලැබෙන දත්ත Text එකක් නම්
-      options.body = event.data.text();
+      try {
+        const text = event.data.text();
+        if (text) body = text;
+      } catch (err) {}
     }
   }
+
+  const options = {
+    body,
+    icon,
+    badge: icon,
+    vibrate: [200, 100, 200],
+    silent: false,
+    data: {
+      url
+    },
+    actions: [
+      { action: 'open', title: 'Open App' },
+      { action: 'close', title: 'Close' }
+    ]
+  };
 
   event.waitUntil(
     self.registration.showNotification(title, options)
   );
 });
 
-// Notification එකක් මත ක්ලික් කළ විට ඇප් එක විවෘත කිරීම
+// Notification click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+
+  const targetUrl = event.notification?.data?.url || './index.html';
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      if (clientList.length > 0) {
-        return clientList[0].focus();
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
       }
-      return clients.openWindow('./index.html');
+
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
     })
   );
 });
-self.addEventListener('push', function(event) {
-  let data = {};
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch (e) {
-    data = { title: 'K-Win Notification', body: 'New message received' };
-  }
 
-  const title = data.title || 'K-Win Notification';
-  const options = {
-    body: data.body || '',
-    icon: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
-    badge: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
-    vibrate: [200, 100, 200],
-    silent: false
-  };
-
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
-self.addEventListener('notificationclick', function(event) {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      for (let i = 0; i < clientList.length; i++) {
-        const client = clientList[i];
-        if ('focus' in client) return client.focus();
-      }
-      if (clients.openWindow) return clients.openWindow('/');
-    })
-  );
+// Optional: notification close event
+self.addEventListener('notificationclose', () => {
+  // no-op
 });
