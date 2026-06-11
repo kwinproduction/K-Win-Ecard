@@ -122,3 +122,35 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+self.addEventListener('push', function(event) {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'K-Win Notification', body: 'New message received' };
+  }
+
+  const title = data.title || 'K-Win Notification';
+  const options = {
+    body: data.body || '',
+    icon: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
+    badge: 'https://raw.githubusercontent.com/kwinproduction/K-Win-Ecard/main/logo.jpeg',
+    vibrate: [200, 100, 200],
+    silent: false
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if ('focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow('/');
+    })
+  );
+});
